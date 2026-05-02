@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo Floresta Fóssil de Altos </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS VARIABLES & RESET
+           ============================================ */
+        :root {
+            --norte: #FF6B6B;
+            --norte-light: #ff9a9a;
+            --norte-dark: #e84545;
+            --centro-norte: #4ECDC4;
+            --centro-norte-light: #7eddd6;
+            --centro-norte-dark: #36b5ad;
+            --sudeste: #FFD93D;
+            --sudeste-light: #ffe682;
+            --sudeste-dark: #f0c400;
+            --sudoeste: #6BCB77;
+            --sudoeste-light: #95dca0;
+            --sudoeste-dark: #4fb85b;
+            --bg-cream: #FFF8E7;
+            --bg-warm: #FFF3D6;
+            --text-dark: #2C3E50;
+            --text-medium: #5D6D7E;
+            --white: #FFFFFF;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-medium: 0 8px 32px rgba(0,0,0,0.12);
+            --shadow-card: 0 6px 24px rgba(0,0,0,0.1);
+            --radius-large: 24px;
+            --radius-medium: 16px;
+            --radius-small: 10px;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           BACKGROUND TEXTURE
+           ============================================ */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255,107,107,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(78,205,196,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255,217,61,0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23e8dcc8' stroke-width='0.5' fill='none' opacity='0.3'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.3)); }
+            50% { filter: drop-shadow(0 0 18px rgba(255,255,255,0.7)); }
+        }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slide-in-left {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slide-in-right {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes bounce-soft {
+            0%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+
+        @keyframes cloud-drift {
+            0% { transform: translateX(-20px); }
+            100% { transform: translateX(20px); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes title-wave {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           HEADER / HERO
+           ============================================ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .hero-decorations {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .deco-cloud {
+            position: absolute;
+            opacity: 0.15;
+            animation: cloud-drift 8s ease-in-out infinite alternate;
+        }
+
+        .deco-cloud:nth-child(1) { top: 8%; left: 5%; animation-duration: 10s; }
+        .deco-cloud:nth-child(2) { top: 12%; right: 8%; animation-duration: 7s; animation-delay: -3s; }
+        .deco-cloud:nth-child(3) { top: 25%; left: 80%; animation-duration: 12s; animation-delay: -5s; }
+        .deco-cloud:nth-child(4) { bottom: 15%; left: 10%; animation-duration: 9s; animation-delay: -2s; }
+
+        .deco-star {
+            position: absolute;
+            width: 20px; height: 20px;
+            animation: sparkle 3s ease-in-out infinite;
+        }
+
+        .deco-star:nth-child(5) { top: 15%; left: 15%; animation-delay: 0s; }
+        .deco-star:nth-child(6) { top: 20%; right: 20%; animation-delay: 1s; }
+        .deco-star:nth-child(7) { top: 50%; left: 8%; animation-delay: 2s; }
+        .deco-star:nth-child(8) { bottom: 20%; right: 12%; animation-delay: 0.5s; }
+        .deco-star:nth-child(9) { top: 35%; right: 5%; animation-delay: 1.5s; }
+
+        .hero-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            text-align: center;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+            /*background: linear-gradient(135deg, var(--norte), var(--centro-norte), var(--sudeste), var(--sudoeste));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            /*animation: title-wave 4s ease-in-out infinite;*/
+            text-shadow: none;
+            letter-spacing: 2px;
+        }
+
+        .hero-subtitle {
+            font-family: 'Nunito', sans-serif;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-weight: 600;
+            color: var(--text-medium);
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero-subtitle span {
+            display: inline-block;
+            animation: bounce-soft 2s ease-in-out infinite;
+        }
+
+        .hero-hint {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-medium);
+            text-align: center;
+            margin-top: 24px;
+            z-index: 2;
+            position: relative;
+            animation: bounce-soft 2.5s ease-in-out infinite;
+            background: rgba(255,255,255,0.7);
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 2px dashed var(--centro-norte);
+        }
+
+        .hero-hint svg {
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        /* ============================================
+           MAP CONTAINER
+           ============================================ */
+        .map-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .map-svg-wrapper {
+            position: relative;
+            filter: drop-shadow(0 8px 30px rgba(0,0,0,0.15));
+        }
+
+        .map-svg-wrapper svg {
+            width: 100%;
+            height: auto;
+            cursor: default;
+        }
+
+        /* Map region styles */
+        .map-region {
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+            stroke: var(--white);
+            stroke-width: 2.5;
+            stroke-linejoin: round;
+        }
+
+        .map-region:hover {
+            filter: brightness(1.15) saturate(1.2);
+            transform: scale(1.03);
+            stroke-width: 4;
+            stroke: var(--white);
+        }
+
+        .map-region:active {
+            transform: scale(0.98);
+        }
+
+        .map-label {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 13px;
+            fill: var(--white);
+            pointer-events: none;
+            text-anchor: middle;
+            paint-order: stroke;
+            stroke: rgba(0,0,0,0.3);
+            stroke-width: 3px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            font-weight: 400;
+        }
+
+        .map-icon {
+            pointer-events: none;
+            animation: float-slow 4s ease-in-out infinite;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .map-icon:nth-of-type(2) { animation-delay: -1s; }
+        .map-icon:nth-of-type(3) { animation-delay: -2s; }
+        .map-icon:nth-of-type(4) { animation-delay: -3s; }
+
+        /* ============================================
+           SECTIONS
+           ============================================ */
+        .section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: 0;
+            width: 100%;
+            height: 80px;
+            z-index: 2;
+        }
+
+        .section-norte { background: linear-gradient(175deg, #fff0f0 0%, #ffe8e8 50%, #ffd4d4 100%); }
+        .section-centro-norte { background: linear-gradient(175deg, #e8faf8 0%, #d4f5f1 50%, #c0f0eb 100%); }
+        .section-sudeste { background: linear-gradient(175deg, #fff9e0 0%, #fff3c4 50%, #ffecaa 100%); }
+        .section-sudoeste { background: linear-gradient(175deg, #e8f8ea 0%, #d4f1d8 50%, #c0eac6 100%); }
+
+        .section-norte::before {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath d='M0,40 C360,80 720,0 1080,50 C1260,65 1360,30 1440,40 L1440,80 L0,80 Z' fill='%23fff0f0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: 100% 100%;
+        }
+        .section-centro-norte::before {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath d='M0,50 C240,10 480,70 720,30 C960,0 1200,60 1440,40 L1440,80 L0,80 Z' fill='%23e8faf8'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: 100% 100%;
+        }
+        .section-sudeste::before {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath d='M0,30 C180,70 540,10 720,50 C900,80 1260,20 1440,45 L1440,80 L0,80 Z' fill='%23fff9e0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: 100% 100%;
+        }
+        .section-sudoeste::before {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath d='M0,60 C300,20 600,70 900,30 C1100,10 1300,50 1440,35 L1440,80 L0,80 Z' fill='%23e8f8ea'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: 100% 100%;
+        }
+
+        .section-card {
+            background: var(--white);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-card);
+            max-width: 900px;
+            width: 100%;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+        }
+
+        .section-norte .section-card::before { background: linear-gradient(90deg, var(--norte), var(--norte-light)); }
+        .section-centro-norte .section-card::before { background: linear-gradient(90deg, var(--centro-norte), var(--centro-norte-light)); }
+        .section-sudeste .section-card::before { background: linear-gradient(90deg, var(--sudeste), var(--sudeste-light)); }
+        .section-sudoeste .section-card::before { background: linear-gradient(90deg, var(--sudoeste), var(--sudoeste-light)); }
+
+        .section-card::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; right: -40px;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            opacity: 0.06;
+        }
+
+        .section-norte .section-card::after { background: var(--norte); }
+        .section-centro-norte .section-card::after { background: var(--centro-norte); }
+        .section-sudeste .section-card::after { background: var(--sudeste); }
+        .section-sudoeste .section-card::after { background: var(--sudoeste); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+            animation: float-slow 3s ease-in-out infinite;
+        }
+
+        .section-norte .section-icon { background: linear-gradient(135deg, var(--norte), var(--norte-light)); }
+        .section-centro-norte .section-icon { background: linear-gradient(135deg, var(--centro-norte), var(--centro-norte-light)); }
+        .section-sudeste .section-icon { background: linear-gradient(135deg, var(--sudeste), var(--sudeste-light)); }
+        .section-sudoeste .section-icon { background: linear-gradient(135deg, var(--sudoeste), var(--sudoeste-light)); }
+
+        .section-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            line-height: 1.2;
+        }
+
+        .section-norte .section-title { color: var(--norte-dark); }
+        .section-centro-norte .section-title { color: var(--centro-norte-dark); }
+        .section-sudeste .section-title { color: var(--sudeste-dark); }
+        .section-sudoeste .section-title { color: var(--sudoeste-dark); }
+
+        /* Content grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .content-block {
+            padding: 24px;
+            border-radius: var(--radius-medium);
+            background: rgba(0,0,0,0.02);
+            border: 2px solid rgba(0,0,0,0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .content-block:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .content-block-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .content-block-title .emoji {
+            font-size: 1.4rem;
+        }
+
+        .content-block p, .content-block ul {
+            font-size: 0.95rem;
+            color: var(--text-medium);
+            line-height: 1.7;
+        }
+
+        .content-block ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .content-block ul li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .content-block ul li::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            font-size: 0.7rem;
+        }
+
+        .section-norte .content-block ul li::before { color: var(--norte); }
+        .section-centro-norte .content-block ul li::before { color: var(--centro-norte); }
+        .section-sudeste .content-block ul li::before { color: var(--sudeste); }
+        .section-sudoeste .content-block ul li::before { color: var(--sudoeste); }
+
+        .curiosidade-box {
+            padding: 20px 24px;
+            border-radius: var(--radius-medium);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .section-norte .curiosidade-box { background: rgba(255,107,107,0.1); border-left: 4px solid var(--norte); }
+        .section-centro-norte .curiosidade-box { background: rgba(78,205,196,0.1); border-left: 4px solid var(--centro-norte); }
+        .section-sudeste .curiosidade-box { background: rgba(255,217,61,0.12); border-left: 4px solid var(--sudeste); }
+        .section-sudoeste .curiosidade-box { background: rgba(107,203,119,0.1); border-left: 4px solid var(--sudoeste); }
+
+        .curiosidade-box .emoji {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           QUIZ
+           ============================================ */
+        .quiz-container {
+            padding: 28px;
+            border-radius: var(--radius-medium);
+            background: linear-gradient(135deg, rgba(0,0,0,0.02), rgba(0,0,0,0.05));
+            border: 2px dashed rgba(0,0,0,0.1);
+        }
+
+        .quiz-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quiz-question {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 14px 20px;
+            border-radius: var(--radius-small);
+            background: var(--white);
+            border: 2px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-option:hover:not(.selected) {
+            border-color: rgba(0,0,0,0.15);
+            background: rgba(0,0,0,0.02);
+            transform: translateX(4px);
+        }
+
+        .quiz-option.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .quiz-option.correct::after {
+            content: '✓';
+            position: absolute;
+            right: 16px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #4caf50;
+        }
+
+        .quiz-option.wrong {
+            background: #fce4ec;
+            border-color: #ef5350;
+            color: #c62828;
+        }
+
+        .quiz-option.wrong::after {
+            content: '✗';
+            position: absolute;
+            right: 16px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #ef5350;
+        }
+
+        .quiz-option.selected {
+            pointer-events: none;
+        }
+
+        .quiz-option .option-letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .section-norte .quiz-option .option-letter { background: rgba(255,107,107,0.15); color: var(--norte-dark); }
+        .section-centro-norte .quiz-option .option-letter { background: rgba(78,205,196,0.15); color: var(--centro-norte-dark); }
+        .section-sudeste .quiz-option .option-letter { background: rgba(255,217,61,0.2); color: var(--sudeste-dark); }
+        .section-sudoeste .quiz-option .option-letter { background: rgba(107,203,119,0.15); color: var(--sudoeste-dark); }
+
+        .quiz-feedback {
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: var(--radius-small);
+            font-weight: 700;
+            display: none;
+            animation: slide-up 0.3s ease;
+        }
+
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.correct { background: #e8f5e9; color: #2e7d32; }
+        .quiz-feedback.wrong { background: #fce4ec; color: #c62828; }
+
+        .quiz-next-btn {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            border: none;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .quiz-next-btn.show { display: inline-block; }
+
+        .section-norte .quiz-next-btn { background: var(--norte); }
+        .section-centro-norte .quiz-next-btn { background: var(--centro-norte); }
+        .section-sudeste .quiz-next-btn { background: var(--sudeste-dark); color: var(--text-dark); }
+        .section-sudoeste .quiz-next-btn { background: var(--sudoeste); }
+
+        .quiz-next-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        .quiz-score {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 20px;
+            animation: slide-up 0.4s ease;
+        }
+
+        /* ============================================
+           BACK TO MAP BUTTON
+           ============================================ */
+        .back-to-map {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 28px;
+            padding: 14px 32px;
+            border-radius: 30px;
+            background: var(--text-dark);
+            color: var(--white);
+            text-decoration: none;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            animation: bounce-soft 3s ease-in-out infinite;
+        }
+
+        .back-to-map:hover {
+            transform: scale(1.06) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44,62,80,0.3);
+        }
+
+        .back-to-map svg {
+            transition: transform 0.3s ease;
+        }
+
+        .back-to-map:hover svg {
+            transform: translateX(-4px);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--text-dark);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.3rem;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .footer-hearts {
+            margin-top: 8px;
+            font-size: 1.1rem;
+        }
+
+        .footer-hearts span {
+            display: inline-block;
+            animation: float-slow 2s ease-in-out infinite;
+        }
+
+        .footer-hearts span:nth-child(2) { animation-delay: 0.3s; }
+        .footer-hearts span:nth-child(3) { animation-delay: 0.6s; }
+
+        /* ============================================
+           RESPONSIVO
+           ============================================ */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 30px 16px;
+                min-height: auto;
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+
+            .section {
+                padding: 60px 16px;
+                min-height: auto;
+            }
+
+            .section-card {
+                padding: 28px 20px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .section-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 26px;
+            }
+
+            .map-container {
+                max-width: 95%;
+            }
+
+            .map-label {
+                font-size: 10px;
+            }
+
+            .quiz-option {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .deco-cloud, .deco-star {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+
+            .content-block {
+                padding: 18px;
+            }
+        }
+
+        /* ============================================
+           TOOLTIP
+           ============================================ */
+        .map-tooltip {
+            position: fixed;
+            padding: 8px 16px;
+            background: var(--text-dark);
+            color: var(--white);
+            border-radius: 8px;
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 0.95rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        .map-tooltip.visible {
+            opacity: 1;
+        }
+
+        .map-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tooltip -->
+    <div class="map-tooltip" id="mapTooltip"></div>
+
+    <!-- ==========================================
+         HERO / MAP SECTION
+         ========================================== -->
+    <section class="hero" id="mapa">
+        <!-- Decorations -->
+        <div class="hero-decorations">
+            <!-- Clouds -->
+            <svg class="deco-cloud" width="120" height="50" viewBox="0 0 120 50">
+                <ellipse cx="50" cy="30" rx="40" ry="18" fill="#4ECDC4" opacity="0.5"/>
+                <ellipse cx="75" cy="25" rx="30" ry="15" fill="#4ECDC4" opacity="0.4"/>
+                <ellipse cx="35" cy="28" rx="25" ry="12" fill="#4ECDC4" opacity="0.3"/>
+            </svg>
+            <svg class="deco-cloud" width="100" height="45" viewBox="0 0 100 45">
+                <ellipse cx="45" cy="25" rx="35" ry="16" fill="#FF6B6B" opacity="0.4"/>
+                <ellipse cx="65" cy="22" rx="25" ry="13" fill="#FF6B6B" opacity="0.3"/>
+            </svg>
+            <svg class="deco-cloud" width="90" height="40" viewBox="0 0 90 40">
+                <ellipse cx="40" cy="22" rx="30" ry="14" fill="#FFD93D" opacity="0.4"/>
+                <ellipse cx="60" cy="20" rx="22" ry="11" fill="#FFD93D" opacity="0.3"/>
+            </svg>
+            <svg class="deco-cloud" width="110" height="45" viewBox="0 0 110 45">
+                <ellipse cx="50" cy="25" rx="38" ry="16" fill="#6BCB77" opacity="0.4"/>
+                <ellipse cx="72" cy="22" rx="28" ry="13" fill="#6BCB77" opacity="0.3"/>
+            </svg>
+            <!-- Stars -->
+            <svg class="deco-star" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#FFD93D" opacity="0.6"/></svg>
+            <svg class="deco-star" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#FF6B6B" opacity="0.5"/></svg>
+            <svg class="deco-star" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#4ECDC4" opacity="0.5"/></svg>
+            <svg class="deco-star" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#6BCB77" opacity="0.5"/></svg>
+            <svg class="deco-star" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="#FFD93D" opacity="0.4"/></svg>
+        </div>
+
+        <h1 class="hero-title">Descubra o Piaui! e Floresta Fóssil de Altos </h1>
+        <p class="hero-subtitle">
+            "O que os troncos petrificados da Floresta Fóssil de Altos podem nos revelar sobre o clima e a vegetação de milhões de anos atrás?"
+        
+        </p>
+
+        <!-- MAP SVG -->
+        <div class="map-container">
+            <div class="map-svg-wrapper">
+                <svg viewBox="0 0 500 650" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa interativo do Piaui com quatro mesorregioes">
+                    <!-- Background decoration -->
+                    <defs>
+                        <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.15"/>
+                        </filter>
+                        <linearGradient id="gradNorte" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF6B6B"/>
+                            <stop offset="100%" style="stop-color:#ff8e8e"/>
+                        </linearGradient>
+                        <linearGradient id="gradCentroNorte" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4ECDC4"/>
+                            <stop offset="100%" style="stop-color:#6dd5cd"/>
+                        </linearGradient>
+                        <linearGradient id="gradSudeste" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FFD93D"/>
+                            <stop offset="100%" style="stop-color:#ffe682"/>
+                        </linearGradient>
+                        <linearGradient id="gradSudoeste" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#6BCB77"/>
+                            <stop offset="100%" style="stop-color:#8fd89a"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Outline glow -->
+                    <g filter="url(#shadow)">
+
+                        <!-- NORTE PIAUIENSE
+                             Top portion of Piaui - includes the coast and northern border -->
+                        <path class="map-region" id="regiao-norte"
+                              data-region="norte"
+                              data-name="Norte Piauiense"
+                              fill="url(#gradNorte)"
+                              d="M 328.8,158.5 L 327.5,154.4 L 331.1,153.0 L 331.9,155.2 L 335.9,157.9 L 339.7,158.1 L 342.4,160.7 L 343.9,160.6 L 351.0,167.9 L 360.3,156.8 L 356.4,156.4 L 355.9,152.6 L 359.5,152.0 L 360.9,148.9 L 363.4,150.0 L 367.8,141.0 L 371.2,141.9 L 373.8,138.8 L 375.1,139.7 L 378.2,138.0 L 382.8,140.3 L 384.9,138.1 L 386.6,139.5 L 388.6,138.7 L 390.9,141.5 L 395.9,140.3 L 394.0,139.9 L 392.3,137.1 L 394.4,131.4 L 389.4,129.7 L 384.4,130.9 L 387.0,124.5 L 383.0,116.4 L 381.4,116.5 L 384.6,112.9 L 384.3,110.0 L 385.7,108.8 L 378.6,106.4 L 379.3,102.5 L 376.5,98.9 L 378.9,97.6 L 379.8,94.1 L 381.2,93.4 L 380.1,92.8 L 379.8,86.0 L 375.4,87.6 L 374.6,84.5 L 372.9,84.8 L 380.1,69.3 L 384.5,65.4 L 385.1,61.2 L 383.5,57.4 L 380.1,56.3 L 379.9,53.9 L 374.7,52.7 L 360.2,52.3 L 350.2,45.5 L 347.2,42.0 L 343.6,43.8 L 342.3,50.3 L 347.1,56.6 L 345.3,60.5 L 338.3,66.9 L 337.5,72.0 L 336.1,71.6 L 332.1,76.5 L 324.4,77.8 L 324.0,78.8 L 326.3,79.6 L 326.1,81.1 L 324.3,81.0 L 324.5,83.1 L 322.9,83.8 L 322.2,86.4 L 319.6,86.9 L 319.0,89.1 L 312.6,90.7 L 310.1,89.3 L 306.2,90.3 L 305.1,92.2 L 303.6,90.7 L 301.1,92.8 L 299.3,92.3 L 299.4,90.2 L 298.2,90.5 L 293.9,98.6 L 290.7,99.9 L 290.2,102.3 L 286.3,105.9 L 286.5,114.1 L 282.5,122.7 L 278.9,125.4 L 278.0,128.0 L 276.1,128.5 L 272.8,135.7 L 270.6,136.7 L 271.5,139.1 L 268.5,139.4 L 264.7,143.8 L 266.3,153.5 L 292.8,158.1 L 292.8,155.3 L 295.2,153.6 L 300.2,158.6 L 302.2,159.0 L 303.9,160.9 L 302.9,161.6 L 312.5,166.6 L 328.8,158.5 Z"/>
+
+                        <!-- CENTRO-NORTE PIAUIENSE
+                             Middle portion - includes Teresina area -->
+                        <path class="map-region" id="regiao-centro-norte"
+                              data-region="centro-norte"
+                              data-name="Centro-Norte Piauiense"
+                              fill="url(#gradCentroNorte)"
+                              d="M 274.8,315.7 L 278.1,320.5 L 286.9,325.9 L 289.9,322.1 L 291.0,322.9 L 293.6,321.5 L 295.0,318.1 L 294.4,317.0 L 299.2,315.9 L 300.0,313.1 L 307.0,313.7 L 308.3,303.5 L 311.6,302.5 L 311.9,307.7 L 320.4,311.7 L 333.1,309.6 L 339.1,311.9 L 340.0,314.4 L 345.7,316.4 L 349.4,321.7 L 356.5,322.0 L 356.5,324.4 L 360.2,324.6 L 364.7,318.0 L 369.0,318.5 L 367.0,305.5 L 372.7,306.1 L 376.5,308.0 L 382.7,312.0 L 381.9,313.6 L 388.6,313.9 L 389.1,312.8 L 393.2,312.3 L 392.3,318.9 L 395.6,319.3 L 416.7,301.6 L 415.7,294.1 L 417.3,288.8 L 412.4,282.4 L 412.9,276.3 L 411.0,270.8 L 408.6,270.0 L 411.0,264.6 L 409.3,260.1 L 408.2,248.0 L 406.4,244.3 L 408.4,243.1 L 409.1,240.3 L 406.6,234.1 L 408.0,229.8 L 406.1,227.0 L 408.3,225.9 L 406.6,223.0 L 408.3,219.5 L 407.3,218.3 L 408.3,216.2 L 406.2,214.4 L 407.6,213.4 L 407.4,210.0 L 403.4,208.3 L 399.9,204.0 L 398.5,204.9 L 396.6,203.9 L 395.5,201.4 L 393.1,201.1 L 393.9,199.2 L 392.7,196.7 L 391.8,197.2 L 389.1,193.6 L 386.9,193.4 L 384.9,188.7 L 385.5,185.4 L 387.8,182.3 L 384.9,180.9 L 390.2,174.8 L 386.3,171.4 L 386.9,168.6 L 385.4,167.9 L 386.9,167.8 L 389.0,164.2 L 391.1,154.9 L 393.9,151.4 L 392.8,144.7 L 395.4,141.0 L 390.9,141.5 L 388.6,138.7 L 386.6,139.5 L 384.9,138.1 L 382.1,140.2 L 381.3,138.7 L 378.2,138.0 L 375.1,139.7 L 373.8,138.8 L 371.2,141.9 L 367.8,141.0 L 363.4,150.0 L 360.9,148.9 L 359.5,152.0 L 355.9,152.6 L 356.4,156.4 L 360.3,156.8 L 351.0,167.9 L 343.9,160.6 L 342.4,160.7 L 339.7,158.1 L 335.9,157.9 L 331.9,155.2 L 331.1,153.0 L 327.5,154.4 L 328.8,158.5 L 312.5,166.6 L 302.9,161.6 L 303.9,160.9 L 302.2,159.0 L 300.2,158.6 L 295.2,153.6 L 292.8,155.3 L 292.8,158.1 L 283.8,156.0 L 276.8,156.1 L 271.7,153.7 L 266.3,153.0 L 266.8,155.1 L 272.1,157.3 L 272.2,160.3 L 274.1,162.0 L 272.4,165.6 L 272.6,168.8 L 267.1,175.5 L 269.3,179.6 L 267.2,182.2 L 273.9,193.4 L 273.3,195.5 L 277.7,210.8 L 275.6,214.3 L 276.8,217.8 L 275.9,221.7 L 270.2,224.9 L 268.6,228.1 L 266.2,228.8 L 261.5,238.7 L 258.1,239.2 L 257.1,240.6 L 258.6,248.3 L 256.8,250.2 L 257.1,255.1 L 258.6,257.8 L 256.9,260.2 L 258.2,264.5 L 260.4,266.5 L 258.5,270.1 L 260.6,274.2 L 264.3,275.1 L 265.9,279.2 L 273.9,284.2 L 273.5,289.7 L 275.2,289.4 L 275.6,290.5 L 272.3,295.8 L 273.1,300.3 L 271.8,301.3 L 272.7,302.3 L 271.8,306.4 L 269.5,311.3 L 273.7,312.8 L 274.8,315.7 Z"/>
+
+                        <!-- SUDOESTE PIAUIENSE
+                             Bottom-left - cerrado region -->
+                        <path class="map-region" id="regiao-sudoeste"
+                              data-region="sudoeste"
+                              data-name="Sudoeste Piauiense"
+                              fill="url(#gradSudoeste)"
+                              d="M 259.7,502.0 L 259.8,503.5 L 265.7,502.8 L 267.5,510.4 L 270.4,511.0 L 272.6,513.6 L 275.1,512.6 L 276.2,517.4 L 279.7,517.4 L 283.4,513.0 L 283.2,511.3 L 285.9,512.5 L 289.8,512.0 L 292.3,509.0 L 298.9,508.8 L 299.1,506.6 L 302.5,506.1 L 303.7,503.2 L 308.1,500.7 L 308.4,498.7 L 311.1,496.4 L 317.0,494.1 L 326.0,494.0 L 331.3,491.8 L 333.0,492.9 L 334.9,491.7 L 338.7,493.8 L 342.0,491.0 L 344.2,491.3 L 346.8,484.8 L 351.3,481.1 L 351.9,475.7 L 355.1,475.4 L 360.3,471.6 L 364.4,471.9 L 367.4,465.1 L 373.7,458.9 L 371.4,457.5 L 367.7,461.2 L 364.5,459.3 L 360.7,460.3 L 358.5,458.0 L 353.9,457.3 L 353.4,455.8 L 349.6,456.0 L 346.4,452.7 L 343.5,453.8 L 331.3,445.9 L 329.4,446.7 L 327.6,445.0 L 325.3,445.6 L 324.3,444.5 L 322.1,446.2 L 319.9,445.7 L 318.5,450.3 L 312.8,448.9 L 311.5,451.2 L 300.1,450.8 L 282.2,460.7 L 284.1,445.3 L 288.8,439.5 L 288.6,433.4 L 292.6,421.4 L 292.7,414.1 L 287.4,407.5 L 283.7,406.7 L 285.5,390.0 L 280.7,384.7 L 282.7,380.0 L 284.4,380.6 L 286.0,379.3 L 286.0,377.1 L 292.8,376.5 L 292.6,383.2 L 297.8,394.4 L 299.6,394.0 L 300.0,384.7 L 304.2,388.5 L 308.4,386.2 L 319.9,386.1 L 312.3,379.5 L 317.8,379.7 L 321.2,372.2 L 317.9,366.4 L 308.0,365.0 L 311.5,351.6 L 305.1,347.9 L 303.9,333.9 L 289.7,335.9 L 293.8,327.1 L 291.2,324.9 L 291.0,322.9 L 289.9,322.1 L 286.9,325.9 L 278.1,320.5 L 273.7,312.8 L 269.8,311.6 L 263.0,319.5 L 258.2,318.7 L 253.6,321.2 L 246.9,320.0 L 244.4,322.0 L 239.6,322.2 L 234.8,325.3 L 230.5,324.7 L 228.8,322.3 L 226.3,321.5 L 224.9,318.7 L 223.4,319.3 L 219.3,316.5 L 214.3,315.3 L 210.2,316.4 L 208.8,315.5 L 199.3,320.3 L 197.3,318.3 L 192.3,319.5 L 190.6,320.5 L 189.8,323.8 L 186.5,322.7 L 187.6,325.8 L 185.9,324.7 L 182.7,328.2 L 182.5,330.9 L 180.8,331.3 L 180.2,334.0 L 176.4,336.2 L 175.6,341.0 L 173.5,344.3 L 167.9,344.5 L 159.6,349.0 L 158.2,351.5 L 155.6,351.8 L 152.0,357.5 L 148.7,359.0 L 147.0,363.4 L 144.1,363.2 L 143.2,361.2 L 140.6,362.3 L 138.1,361.1 L 134.4,365.4 L 132.3,365.6 L 130.6,368.7 L 122.0,371.6 L 114.6,371.6 L 110.3,375.5 L 109.2,374.1 L 107.3,375.7 L 102.2,376.1 L 92.8,383.9 L 92.0,388.1 L 91.0,388.0 L 91.5,390.4 L 88.0,396.0 L 89.4,397.4 L 87.8,398.2 L 89.1,399.1 L 87.7,399.8 L 86.1,405.0 L 87.2,406.4 L 85.4,407.3 L 86.4,408.5 L 84.8,412.0 L 85.0,416.2 L 79.5,422.7 L 77.6,429.9 L 74.6,433.9 L 74.3,440.0 L 72.6,444.3 L 70.4,445.9 L 72.4,447.4 L 68.9,449.1 L 67.2,454.9 L 65.6,454.8 L 63.7,458.1 L 60.5,459.3 L 58.9,461.9 L 59.9,463.6 L 58.1,465.0 L 56.5,469.5 L 60.0,475.5 L 61.1,484.1 L 63.3,487.4 L 62.6,495.0 L 63.5,498.2 L 68.3,500.4 L 71.2,507.8 L 67.1,513.5 L 68.6,517.3 L 67.3,522.7 L 68.5,528.0 L 65.4,534.8 L 67.1,539.7 L 64.5,547.8 L 64.7,551.1 L 59.9,557.3 L 59.9,561.6 L 55.3,561.1 L 54.2,562.9 L 58.2,568.6 L 62.3,569.4 L 64.0,567.3 L 62.0,565.4 L 63.3,562.0 L 65.1,561.0 L 70.5,562.3 L 74.6,559.6 L 75.1,554.6 L 84.3,551.4 L 86.1,553.4 L 86.5,558.3 L 89.0,560.1 L 89.8,563.8 L 95.6,568.6 L 96.0,573.3 L 98.0,574.5 L 94.4,578.9 L 94.4,582.4 L 95.5,587.4 L 98.7,588.8 L 100.6,594.4 L 106.8,597.5 L 108.2,600.6 L 120.3,601.9 L 130.1,608.0 L 135.1,604.9 L 136.2,606.0 L 138.7,603.7 L 140.0,599.7 L 142.1,599.4 L 143.0,597.6 L 148.4,596.3 L 148.5,591.0 L 151.8,590.2 L 154.1,587.3 L 160.0,588.7 L 163.0,585.8 L 167.0,585.7 L 171.3,581.7 L 176.3,587.0 L 179.8,586.3 L 184.3,588.3 L 189.6,583.9 L 192.8,576.6 L 193.0,572.0 L 196.5,573.7 L 200.4,573.3 L 200.5,570.3 L 205.8,564.8 L 205.8,561.0 L 209.9,556.2 L 210.8,549.3 L 215.8,549.1 L 218.0,544.4 L 215.1,541.4 L 216.0,538.9 L 214.7,537.7 L 218.6,532.6 L 209.5,527.3 L 208.6,522.7 L 205.5,518.6 L 204.9,512.7 L 209.9,505.6 L 216.3,503.4 L 223.7,496.7 L 231.3,492.6 L 234.2,493.4 L 238.8,499.8 L 241.0,500.3 L 244.5,503.9 L 249.0,502.2 L 251.1,503.4 L 253.2,500.5 L 259.7,502.0 Z"/>
+
+                        <!-- SUDESTE PIAUIENSE
+                             Bottom-right - Serra da Capivara region -->
+                        <path class="map-region" id="regiao-sudeste"
+                              data-region="sudeste"
+                              data-name="Sudeste Piauiense"
+                              fill="url(#gradSudeste)"
+                              d="M 418.5,422.2 L 422.5,420.8 L 427.5,415.0 L 430.6,414.9 L 429.7,411.9 L 433.8,402.4 L 433.5,393.4 L 424.8,388.8 L 428.4,381.2 L 422.9,372.5 L 422.1,368.9 L 433.5,363.3 L 433.9,359.1 L 436.0,356.8 L 437.5,344.3 L 441.8,338.5 L 441.1,337.3 L 443.3,336.5 L 441.7,335.7 L 441.6,327.0 L 445.8,322.5 L 441.5,323.2 L 438.4,317.6 L 429.7,316.5 L 426.5,313.9 L 421.7,313.4 L 420.7,312.3 L 421.4,309.7 L 416.7,301.6 L 395.6,319.3 L 392.3,318.9 L 393.2,312.3 L 389.1,312.8 L 388.6,313.9 L 381.9,313.6 L 382.7,312.0 L 376.5,308.0 L 372.7,306.1 L 367.0,305.5 L 369.0,318.5 L 364.7,318.0 L 360.2,324.6 L 356.5,324.4 L 356.5,322.0 L 349.4,321.7 L 345.7,316.4 L 340.0,314.4 L 339.1,311.9 L 333.1,309.6 L 320.4,311.7 L 311.9,307.7 L 311.6,302.5 L 308.3,303.5 L 307.0,313.7 L 300.7,312.8 L 299.2,315.9 L 294.4,317.0 L 295.0,318.1 L 293.6,321.5 L 290.9,323.4 L 293.8,327.1 L 289.7,335.9 L 303.9,333.9 L 305.1,347.9 L 311.5,351.6 L 308.0,365.0 L 317.9,366.4 L 321.2,372.2 L 317.8,379.7 L 312.3,379.5 L 319.9,386.1 L 308.4,386.2 L 304.2,388.5 L 300.0,384.7 L 299.6,394.0 L 297.8,394.4 L 292.6,383.2 L 292.8,376.5 L 286.0,377.1 L 286.0,379.3 L 284.4,380.6 L 282.7,380.0 L 280.7,384.7 L 285.5,390.0 L 283.7,406.7 L 287.4,407.5 L 292.7,414.1 L 292.6,421.4 L 288.6,433.4 L 288.8,439.5 L 284.1,445.3 L 282.2,460.7 L 300.1,450.8 L 311.5,451.2 L 312.8,448.9 L 318.5,450.3 L 319.9,445.7 L 322.1,446.2 L 324.3,444.5 L 325.3,445.6 L 327.6,445.0 L 329.3,446.7 L 330.4,445.8 L 333.4,446.8 L 335.2,449.3 L 339.3,450.5 L 343.5,453.8 L 346.4,452.7 L 349.6,456.0 L 353.4,455.8 L 353.9,457.3 L 358.5,458.0 L 360.6,460.3 L 364.5,459.3 L 367.7,461.2 L 370.7,457.6 L 373.7,458.9 L 375.8,454.3 L 378.9,454.4 L 382.3,451.1 L 387.4,449.9 L 387.5,447.0 L 390.5,445.7 L 391.9,442.3 L 393.4,442.8 L 395.6,441.2 L 396.7,438.0 L 398.7,438.6 L 399.2,435.6 L 402.2,433.1 L 403.7,432.9 L 407.4,436.2 L 409.0,434.4 L 409.6,430.1 L 413.5,431.7 L 414.7,427.6 L 417.4,426.2 L 417.2,423.0 L 418.5,422.2 Z"/>
+
+                    </g>
+
+                    <!-- Region Labels -->
+                    <text class="map-label" x="340" y="100" font-size="14">Norte</text>
+                    <text class="map-label" x="340" y="118" font-size="11">Piauiense</text>
+
+                    <text class="map-label" x="335" y="222" font-size="14">Centro-Norte</text>
+                    <text class="map-label" x="335" y="240" font-size="11">Piauiense</text>
+
+                    <text class="map-label" x="155" y="455" font-size="14">Sudoeste</text>
+                    <text class="map-label" x="155" y="473" font-size="11">Piauiense</text>
+
+                    <text class="map-label" x="375" y="380" font-size="14">Sudeste</text>
+                    <text class="map-label" x="375" y="398" font-size="11">Piauiense</text>
+
+                                   <!-- Small decorative compass -->
+                    <g transform="translate(15, 35)" opacity="0.5">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="#2C3E50" stroke-width="1.5"/>
+                        <text x="20" y="10" text-anchor="middle" font-size="8" fill="#2C3E50" font-weight="700">N</text>
+                        <text x="20" y="36" text-anchor="middle" font-size="7" fill="#2C3E50">S</text>
+                        <text x="6" y="23" text-anchor="middle" font-size="7" fill="#2C3E50">O</text>
+                        <text x="34" y="23" text-anchor="middle" font-size="7" fill="#2C3E50">L</text>
+                        <line x1="20" y1="13" x2="20" y2="27" stroke="#2C3E50" stroke-width="1"/>
+                        <line x1="13" y1="20" x2="27" y2="20" stroke="#2C3E50" stroke-width="1"/>
+                        <polygon points="20,13 18,18 22,18" fill="#e84545"/>
+                    </g>
+
+                </svg>
+            </div>
+        </div>
+
+        <p class="hero-hint">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+            Clique em uma regiao do mapa para explorar!
+        </p>
+    </section>
+
+    <!-- ==========================================
+         NORTE PIAUIENSE
+         ========================================== -->
+    <section class="section section-norte" id="secao-norte">
+        <div class="section-card animate-on-scroll">
+            <div class="section-header">
+                <div class="section-icon"></div>
+                <h2 class="section-title">Atividade 1</h2>
+            </div>
+
+            <div class="curiosidade-box">
+                <span class="emoji">💡</span>
+                <span>Orientações sobre a atividade</span>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">📍</span> lista 1
+                    </h3>
+                    <ul>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🌍</span> Texto Apoio
+                    </h3>
+                    <p>Texto de apoio aqui</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🎭</span> imagem de apoio aqui
+                    </h3>
+                    <p>imagem</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🐠</span> Anotações
+                    </h3>
+                    <form>
+                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Norte -->
+            <div class="quiz-container" id="quiz-norte">
+                <h3 class="quiz-title">🧠 Teste seus conhecimentos!</h3>
+                <div class="quiz-question" id="quiz-norte-question"></div>
+                <div class="quiz-options" id="quiz-norte-options"></div>
+                <div class="quiz-feedback" id="quiz-norte-feedback"></div>
+                <button class="quiz-next-btn" id="quiz-norte-next" onclick="nextQuestion('norte')">Proxima pergunta →</button>
+                <div class="quiz-score" id="quiz-norte-score" style="display:none;"></div>
+            </div>
+
+            <button class="back-to-map" onclick="scrollToMap()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+                Voltar ao Mapa
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         CENTRO-NORTE PIAUIENSE
+         ========================================== -->
+    <section class="section section-centro-norte" id="secao-centro-norte">
+        <div class="section-card animate-on-scroll">
+            <div class="section-header">
+                <div class="section-icon">🏛️</div>
+                <h2 class="section-title">Atividade 2</h2>
+            </div>
+
+            <div class="curiosidade-box">
+                <span class="emoji">💡</span>
+                <span>Orientações sobre a atividade</span>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">📍</span>Lista 2
+                    </h3>
+                    <ul>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                        <li>texto aqui</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🌍</span> texto 2
+                    </h3>
+                    <p>texto de apoio</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🎭</span> imagem
+                    </h3>
+                    <p>imagem </p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🍽️</span> Anotações 
+                    </h3>
+                    <form>
+                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Centro-Norte -->
+            <div class="quiz-container" id="quiz-centro-norte">
+                <h3 class="quiz-title">🧠 Teste seus conhecimentos!</h3>
+                <div class="quiz-question" id="quiz-centro-norte-question"></div>
+                <div class="quiz-options" id="quiz-centro-norte-options"></div>
+                <div class="quiz-feedback" id="quiz-centro-norte-feedback"></div>
+                <button class="quiz-next-btn" id="quiz-centro-norte-next" onclick="nextQuestion('centro-norte')">Proxima pergunta →</button>
+                <div class="quiz-score" id="quiz-centro-norte-score" style="display:none;"></div>
+            </div>
+
+            <button class="back-to-map" onclick="scrollToMap()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+                Voltar ao Mapa
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SUDESTE PIAUIENSE
+         ========================================== -->
+    <section class="section section-sudeste" id="secao-sudeste">
+        <div class="section-card animate-on-scroll">
+            <div class="section-header">
+                <div class="section-icon">🏔️</div>
+                <h2 class="section-title">Atividade 3</h2>
+            </div>
+
+            <div class="curiosidade-box">
+                <span class="emoji">💡</span>
+                <span>Orientações sobre a atividade </span>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">📍</span> Lista 3
+                    </h3>
+                    <ul>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🌍</span> Texto de Apoio 3
+                    </h3>
+                    <p>texto de apoio aqui</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🎨</span> imagem
+                    </h3>
+                    <p>imagem aqui</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🦎</span> Anotações
+                    </h3>
+                    <form>
+                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Sudeste -->
+            <div class="quiz-container" id="quiz-sudeste">
+                <h3 class="quiz-title">🧠 Teste seus conhecimentos!</h3>
+                <div class="quiz-question" id="quiz-sudeste-question"></div>
+                <div class="quiz-options" id="quiz-sudeste-options"></div>
+                <div class="quiz-feedback" id="quiz-sudeste-feedback"></div>
+                <button class="quiz-next-btn" id="quiz-sudeste-next" onclick="nextQuestion('sudeste')">Proxima pergunta →</button>
+                <div class="quiz-score" id="quiz-sudeste-score" style="display:none;"></div>
+            </div>
+
+            <button class="back-to-map" onclick="scrollToMap()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+                Voltar ao Mapa
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SUDOESTE PIAUIENSE
+         ========================================== -->
+    <section class="section section-sudoeste" id="secao-sudoeste">
+        <div class="section-card animate-on-scroll">
+            <div class="section-header">
+                <div class="section-icon">🌾</div>
+                <h2 class="section-title">Atividade 4</h2>
+            </div>
+
+            <div class="curiosidade-box">
+                <span class="emoji">💡</span>
+                <span>Orientações sobre a atividade </span>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">📍</span> Lista 4
+                    </h3>
+                    <ul>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                        <li>texto</li>
+                    </ul>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🌍</span> Texto de Apoio        
+                    </h3>
+                    <p>texto de apoio</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🎭</span> Imagem
+                    </h3>
+                    <p>Imagem aqui</p>
+                </div>
+
+                <div class="content-block">
+                    <h3 class="content-block-title">
+                        <span class="emoji">🌿</span> Anotações
+                    </h3>
+                    <form>
+                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Sudoeste -->
+            <div class="quiz-container" id="quiz-sudoeste">
+                <h3 class="quiz-title">🧠 Teste seus conhecimentos!</h3>
+                <div class="quiz-question" id="quiz-sudoeste-question"></div>
+                <div class="quiz-options" id="quiz-sudoeste-options"></div>
+                <div class="quiz-feedback" id="quiz-sudoeste-feedback"></div>
+                <button class="quiz-next-btn" id="quiz-sudoeste-next" onclick="nextQuestion('sudoeste')">Proxima pergunta →</button>
+                <div class="quiz-score" id="quiz-sudoeste-score" style="display:none;"></div>
+            </div>
+
+            <button class="back-to-map" onclick="scrollToMap()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+                Voltar ao Mapa
+            </button>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         FOOTER
+         ========================================== -->
+    <footer class="footer">
+        <div class="footer-title">Descubra o Piaui!</div>
+        <p>Um projeto educativo sobre o estado do Piaui, Brasil</p>
+        <div class="footer-hearts">
+            <span>🌴</span>
+            <span>💚</span>
+            <span>🌵</span>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         JAVASCRIPT
+         ========================================== -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ============================================
+        // QUIZ DATA
+        // ============================================
+        const quizData = {
+            norte: [
+                {
+                    question: "Pergunta 1",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "O Delta do Parnaiba e o unico delta em mar aberto das Americas e um dos tres do mundo!"
+                },
+                {
+                    question: "Pergunta 2",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 2,
+                    explanation: "O Piaui tem o menor litoral do Brasil, com apenas 66 km!"
+                },
+                {
+                    question: "Pergunta 3",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "O artesanato de palha de carnauba e uma tradicao do Norte Piauiense, reconhecido mundialmente!"
+                }
+            ],
+            'centro-norte': [
+                {
+                    question: "Pergunta 1",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 2,
+                    explanation: "Teresina foi a primeira capital brasileira projetada e planejada, antes mesmo de Belo Horizonte e Brasilia!"
+                },
+                {
+                    question: "Pergunta 2",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "Teresina e banhada pelos rios Poti e Parnaiba, e o encontro deles e uma paisagem famosa!"
+                },
+                {
+                    question: "Pergunta 3",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "A cajuina, feita de caju, e Patrimonio Cultural Imaterial do Brasil!"
+                }
+            ],
+            sudeste: [
+                {
+                    question: "Pergunta 1",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 2,
+                    explanation: "A Serra da Capivara tem mais de 1.300 sitios arqueologicos com pinturas rupestres!"
+                },
+                {
+                    question: "Pergunta 2",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "Oeiras foi a primeira capital do Piaui antes de Teresina!"
+                },
+                {
+                    question: "Pergunta 3",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 2,
+                    explanation: "A caatinga e o bioma predominante no Sudeste Piauiense, um bioma exclusivamente brasileiro!"
+                }
+            ],
+            sudoeste: [
+                {
+                    question: "Pergunta 1",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 1,
+                    explanation: "O cerrado e chamado de 'berco das aguas' porque muitos rios nascem nesse bioma!"
+                },
+                {
+                    question: "Pergunta 2",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 2,
+                    explanation: "O pequi e uma fruta do cerrado com sabor forte e marcante, usado em muitos pratos tipicos!"
+                },
+                {
+                   question: "Pergunta 3",
+                    options: [
+                        "Resposta A",
+                        "Resposta B",
+                        "Resposta C",
+                        "Resposta D"
+                    ],
+                    correct: 3,
+                    explanation: "Floriano e carinhosamente chamada de 'princesa do Sul' do Piaui!"
+                }
+            ]
+        };
+
+        // Quiz state
+        const quizState = {};
+        ['norte', 'centro-norte', 'sudeste', 'sudoeste'].forEach(region => {
+            quizState[region] = {
+                currentQuestion: 0,
+                score: 0,
+                answered: false
+            };
+        });
+
+        // ============================================
+        // INITIALIZE QUIZZES
+        // ============================================
+        function loadQuestion(region) {
+            const state = quizState[region];
+            const data = quizData[region];
+
+            if (state.currentQuestion >= data.length) {
+                showScore(region);
+                return;
+            }
+
+            const q = data[state.currentQuestion];
+            const questionEl = document.getElementById(`quiz-${region}-question`);
+            const optionsEl = document.getElementById(`quiz-${region}-options`);
+            const feedbackEl = document.getElementById(`quiz-${region}-feedback`);
+            const nextBtn = document.getElementById(`quiz-${region}-next`);
+            const scoreEl = document.getElementById(`quiz-${region}-score`);
+
+            questionEl.textContent = `${state.currentQuestion + 1}/${data.length} - ${q.question}`;
+            feedbackEl.className = 'quiz-feedback';
+            feedbackEl.style.display = 'none';
+            nextBtn.classList.remove('show');
+            scoreEl.style.display = 'none';
+            state.answered = false;
+
+            optionsEl.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerHTML = `<span class="option-letter">${letters[i]}</span> ${opt}`;
+                btn.addEventListener('click', () => handleAnswer(region, i));
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(region, selectedIndex) {
+            const state = quizState[region];
+            if (state.answered) return;
+            state.answered = true;
+
+            const data = quizData[region];
+            const q = data[state.currentQuestion];
+            const optionsEl = document.getElementById(`quiz-${region}-options`);
+            const feedbackEl = document.getElementById(`quiz-${region}-feedback`);
+            const nextBtn = document.getElementById(`quiz-${region}-next`);
+            const options = optionsEl.querySelectorAll('.quiz-option');
+
+            options.forEach((opt, i) => {
+                opt.classList.add('selected');
+                if (i === q.correct) {
+                    opt.classList.add('correct');
+                } else if (i === selectedIndex) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            const isCorrect = selectedIndex === q.correct;
+            if (isCorrect) {
+                state.score++;
+                feedbackEl.textContent = `✓ Certo! ${q.explanation}`;
+                feedbackEl.className = 'quiz-feedback show correct';
+            } else {
+                feedbackEl.textContent = `✗ Quase! ${q.explanation}`;
+                feedbackEl.className = 'quiz-feedback show wrong';
+            }
+
+            if (state.currentQuestion < data.length - 1) {
+                nextBtn.classList.add('show');
+            } else {
+                setTimeout(() => showScore(region), 1500);
+            }
+        }
+
+        window.nextQuestion = function(region) {
+            quizState[region].currentQuestion++;
+            loadQuestion(region);
+        };
+
+        function showScore(region) {
+            const state = quizState[region];
+            const data = quizData[region];
+            const scoreEl = document.getElementById(`quiz-${region}-score`);
+            const questionEl = document.getElementById(`quiz-${region}-question`);
+            const optionsEl = document.getElementById(`quiz-${region}-options`);
+            const feedbackEl = document.getElementById(`quiz-${region}-feedback`);
+            const nextBtn = document.getElementById(`quiz-${region}-next`);
+
+            questionEl.style.display = 'none';
+            optionsEl.style.display = 'none';
+            feedbackEl.style.display = 'none';
+            nextBtn.classList.remove('show');
+
+            let emoji = '🎉';
+            let msg = '';
+            const pct = state.score / data.length;
+
+            if (pct === 1) {
+                emoji = '🏆';
+                msg = 'Perfeito! Voce acertou tudo!';
+            } else if (pct >= 0.66) {
+                emoji = '🎉';
+                msg = 'Muito bom! Voce sabe bastante!';
+            } else {
+                emoji = '📚';
+                msg = 'Continue estudando! Voce vai melhorar!';
+            }
+
+            scoreEl.innerHTML = `
+                <div style="font-size:3rem; margin-bottom:10px;">${emoji}</div>
+                <div>${msg}</div>
+                <div style="font-size:1rem; margin-top:8px; font-family:'Nunito',sans-serif; font-weight:600; color:var(--text-medium);">
+                    Voce acertou ${state.score} de ${data.length} perguntas!
+                </div>
+                <button class="quiz-next-btn show" style="display:inline-block; margin-top:16px;" onclick="restartQuiz('${region}')">
+                    Tentar novamente 🔄
+                </button>
+            `;
+            scoreEl.style.display = 'block';
+        }
+
+        window.restartQuiz = function(region) {
+            quizState[region].currentQuestion = 0;
+            quizState[region].score = 0;
+            quizState[region].answered = false;
+
+            const questionEl = document.getElementById(`quiz-${region}-question`);
+            const optionsEl = document.getElementById(`quiz-${region}-options`);
+
+            questionEl.style.display = '';
+            optionsEl.style.display = '';
+
+            loadQuestion(region);
+        };
+
+        // ============================================
+        // MAP INTERACTIONS
+        // ============================================
+        const regions = document.querySelectorAll('.map-region');
+        const tooltip = document.getElementById('mapTooltip');
+
+        regions.forEach(region => {
+            // Click - scroll to section
+            region.addEventListener('click', function() {
+                const regionId = this.getAttribute('data-region');
+                const target = document.getElementById(`secao-${regionId}`);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+
+            // Hover - tooltip
+            region.addEventListener('mouseenter', function(e) {
+                const name = this.getAttribute('data-name');
+                tooltip.textContent = name;
+                tooltip.classList.add('visible');
+            });
+
+            region.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.clientX - tooltip.offsetWidth / 2 + 'px';
+                tooltip.style.top = e.clientY - 45 + 'px';
+            });
+
+            region.addEventListener('mouseleave', function() {
+                tooltip.classList.remove('visible');
+            });
+        });
+
+        // ============================================
+        // SCROLL TO MAP
+        // ============================================
+        window.scrollToMap = function() {
+            document.getElementById('mapa').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // ============================================
+        // INTERSECTION OBSERVER - ANIMATE ON SCROLL
+        // ============================================
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Stagger children
+                    const blocks = entry.target.querySelectorAll('.content-block');
+                    blocks.forEach((block, i) => {
+                        block.style.opacity = '0';
+                        block.style.transform = 'translateY(20px)';
+                        block.style.transition = `opacity 0.5s ease ${i * 0.15}s, transform 0.5s ease ${i * 0.15}s`;
+                        setTimeout(() => {
+                            block.style.opacity = '1';
+                            block.style.transform = 'translateY(0)';
+                        }, 50);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        ['norte', 'centro-norte', 'sudeste', 'sudoeste'].forEach(region => {
+            loadQuestion(region);
+        });
+
+    })();
+    </script>
+</body>
+</html>

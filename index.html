@@ -840,12 +840,383 @@
             border-right: 6px solid transparent;
             border-top: 6px solid var(--text-dark);
         }
+
+        /* ============================================
+           SIDE MENU - LINKS EXTERNOS
+           ============================================ */
+        .side-menu {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 90;
+            animation: slide-in-right 0.6s ease-out;
+        }
+
+        .side-menu-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-medium);
+            font-size: 28px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--white);
+        }
+
+        .side-menu-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--norte), var(--centro-norte));
+            border-radius: 50%;
+            z-index: -1;
+            transition: left 0.4s ease;
+        }
+
+        .side-menu-link:hover {
+            transform: scale(1.15) translateX(-12px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            color: var(--white);
+        }
+
+        .side-menu-link:hover::before {
+            left: 0;
+        }
+
+        .side-menu-link:nth-child(1)::before {
+            background: linear-gradient(135deg, var(--norte), var(--norte-light));
+        }
+
+        .side-menu-link:nth-child(2)::before {
+            background: linear-gradient(135deg, var(--centro-norte), var(--centro-norte-light));
+        }
+
+        .side-menu-link:nth-child(3)::before {
+            background: linear-gradient(135deg, var(--sudeste), var(--sudeste-light));
+        }
+
+        .side-menu-link:nth-child(4)::before {
+            background: linear-gradient(135deg, var(--sudoeste), var(--sudoeste-light));
+        }
+
+        .side-menu-link span {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            animation: float-slow 3s ease-in-out infinite;
+        }
+
+        .side-menu-link:nth-child(2) span {
+            animation-delay: -0.5s;
+        }
+
+        .side-menu-link:nth-child(3) span {
+            animation-delay: -1s;
+        }
+
+        .side-menu-link:nth-child(4) span {
+            animation-delay: -1.5s;
+        }
+
+        .side-menu-tooltip {
+            position: absolute;
+            right: 80px;
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 10px 16px;
+            border-radius: var(--radius-small);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .side-menu-link:hover .side-menu-tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Responsivo - Menu Mobile */
+        @media (max-width: 768px) {
+            .side-menu {
+                right: 10px;
+                gap: 12px;
+            }
+
+            .side-menu-link {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .side-menu-link:hover {
+                transform: scale(1.1) translateX(-8px);
+            }
+
+            .side-menu-tooltip {
+                font-size: 0.75rem;
+                right: 65px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .side-menu {
+                position: static;
+                flex-direction: row;
+                transform: none;
+                gap: 8px;
+                padding: 16px;
+                margin: 20px auto;
+                width: fit-content;
+                border-radius: var(--radius-large);
+                background: rgba(255,255,255,0.7);
+                box-shadow: var(--shadow-card);
+            }
+
+            .side-menu-link {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+
+            .side-menu-link:hover {
+                transform: scale(1.05) translateY(-4px);
+            }
+
+            .side-menu-tooltip {
+                display: none;
+            }
+        }
+
+        /* ============================================
+           TEXTAREA DESIGNER
+           ============================================ */
+        .textarea-wrapper {
+            position: relative;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .textarea-wrapper textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: var(--radius-medium);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            outline: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .textarea-wrapper textarea::placeholder {
+            color: rgba(93, 109, 126, 0.5);
+            font-weight: 500;
+        }
+
+        /* Focus states with color variations */
+        .section-norte .textarea-wrapper textarea:focus {
+            border-color: var(--norte);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.15), inset 0 0 0 3px rgba(255, 107, 107, 0.05);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 107, 107, 0.03));
+        }
+
+        .section-centro-norte .textarea-wrapper textarea:focus {
+            border-color: var(--centro-norte);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.15), inset 0 0 0 3px rgba(78, 205, 196, 0.05);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(78, 205, 196, 0.03));
+        }
+
+        .section-sudeste .textarea-wrapper textarea:focus {
+            border-color: var(--sudeste);
+            box-shadow: 0 6px 20px rgba(255, 217, 61, 0.15), inset 0 0 0 3px rgba(255, 217, 61, 0.05);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 217, 61, 0.03));
+        }
+
+        .section-sudoeste .textarea-wrapper textarea:focus {
+            border-color: var(--sudoeste);
+            box-shadow: 0 6px 20px rgba(107, 203, 119, 0.15), inset 0 0 0 3px rgba(107, 203, 119, 0.05);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(107, 203, 119, 0.03));
+        }
+
+        /* Textarea hover effect */
+        .textarea-wrapper textarea:hover:not(:focus) {
+            border-color: rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Character counter */
+        .textarea-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-medium);
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .textarea-wrapper textarea:focus ~ .textarea-counter {
+            opacity: 1;
+        }
+
+        /* Textarea icon */
+        .textarea-icon {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .textarea-wrapper textarea:focus ~ .textarea-icon {
+            opacity: 1;
+        }
+
+        /* Textarea label */
+        .textarea-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        /* Custom scrollbar */
+        .textarea-wrapper textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .textarea-wrapper textarea::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .section-norte .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+            background: rgba(255, 107, 107, 0.4);
+            border-radius: 10px;
+        }
+
+        .section-norte .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 107, 107, 0.7);
+        }
+
+        .section-centro-norte .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+            background: rgba(78, 205, 196, 0.4);
+            border-radius: 10px;
+        }
+
+        .section-centro-norte .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(78, 205, 196, 0.7);
+        }
+
+        .section-sudeste .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+            background: rgba(255, 217, 61, 0.4);
+            border-radius: 10px;
+        }
+
+        .section-sudeste .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 217, 61, 0.7);
+        }
+
+        .section-sudoeste .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+            background: rgba(107, 203, 119, 0.4);
+            border-radius: 10px;
+        }
+
+        .section-sudoeste .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 203, 119, 0.7);
+        }
+
+        /* Responsive textarea */
+        @media (max-width: 768px) {
+            .textarea-wrapper textarea {
+                min-height: 100px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .textarea-wrapper textarea {
+                min-height: 90px;
+                padding: 12px 14px;
+                font-size: 0.85rem;
+            }
+
+            .textarea-counter {
+                font-size: 0.75rem;
+                bottom: 6px;
+                right: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Tooltip -->
     <div class="map-tooltip" id="mapTooltip"></div>
+
+    <!-- Side Menu - Links Externos -->
+    <nav class="side-menu" aria-label="Links externos">
+        <a href="https://pt.wikipedia.org/wiki/Piau%C3%AD" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Wikipedia - Piauí">
+            <span>📖</span>
+            <div class="side-menu-tooltip">Wikipedia</div>
+        </a>
+        <a href="https://www.piauigov.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Governo do Piauí">
+            <span>🏛️</span>
+            <div class="side-menu-tooltip">Gov. Piauí</div>
+        </a>
+        <a href="https://www.florestafossildaltos.com.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Floresta Fóssil de Altos">
+            <span>🌳</span>
+            <div class="side-menu-tooltip">Floresta Fóssil</div>
+        </a>
+        <a href="https://www.viajepelopi.com.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Turismo do Piauí">
+            <span>✈️</span>
+            <div class="side-menu-tooltip">Turismo</div>
+        </a>
+    </nav>
 
     <!-- ==========================================
          HERO / MAP SECTION
@@ -1032,7 +1403,12 @@
                         <span class="emoji">🐠</span> Anotações
                     </h3>
                     <form>
-                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                        <label class="textarea-label">Suas anotações pessoais:</label>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                            <span class="textarea-icon">✏️</span>
+                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1103,7 +1479,12 @@
                         <span class="emoji">🍽️</span> Anotações 
                     </h3>
                     <form>
-                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                        <label class="textarea-label">Suas anotações pessoais:</label>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                            <span class="textarea-icon">✏️</span>
+                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1173,7 +1554,12 @@
                         <span class="emoji">🦎</span> Anotações
                     </h3>
                     <form>
-                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                        <label class="textarea-label">Suas anotações pessoais:</label>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                            <span class="textarea-icon">✏️</span>
+                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1244,7 +1630,12 @@
                         <span class="emoji">🌿</span> Anotações
                     </h3>
                     <form>
-                        <textarea placeholder="Escreva suas anotações aqui..."cols="40" rows="10"></textarea>
+                        <label class="textarea-label">Suas anotações pessoais:</label>
+                        <div class="textarea-wrapper">
+                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                            <span class="textarea-icon">✏️</span>
+                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1647,6 +2038,49 @@
 
         document.querySelectorAll('.animate-on-scroll').forEach(el => {
             observer.observe(el);
+        });
+
+        // ============================================
+        // TEXTAREA CHARACTER COUNTER
+        // ============================================
+        const textareas = document.querySelectorAll('.textarea-wrapper textarea');
+        textareas.forEach(textarea => {
+            const wrapper = textarea.parentElement;
+            const counter = wrapper.querySelector('.char-count');
+            const maxChars = 500;
+
+            // Initial count
+            counter.textContent = textarea.value.length;
+
+            // Update on input
+            textarea.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                counter.textContent = currentLength;
+
+                // Change color if reaching limit
+                if (currentLength > maxChars * 0.8) {
+                    counter.style.color = 'rgba(255, 107, 107, 0.8)';
+                    counter.style.fontWeight = '700';
+                } else if (currentLength > maxChars * 0.5) {
+                    counter.style.color = 'rgba(255, 217, 61, 0.8)';
+                    counter.style.fontWeight = '600';
+                } else {
+                    counter.style.color = 'rgba(93, 109, 126, 0.7)';
+                    counter.style.fontWeight = '600';
+                }
+
+                // Prevent exceeding max
+                if (currentLength > maxChars) {
+                    this.value = this.value.substring(0, maxChars);
+                    counter.textContent = maxChars;
+                    counter.style.color = 'rgba(239, 83, 80, 0.9)';
+                }
+            });
+
+            // Add animation on focus
+            textarea.addEventListener('focus', function() {
+                this.parentElement.style.transition = 'all 0.3s ease';
+            });
         });
 
         // ============================================

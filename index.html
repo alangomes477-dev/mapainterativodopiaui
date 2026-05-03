@@ -276,6 +276,65 @@
             cursor: default;
         }
 
+        /* ============================================
+           FLOATING PANEL
+           ============================================ */
+        .floating-panel {
+            position: absolute;
+            left: -280px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 240px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,248,231,0.95));
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-medium);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-medium);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            z-index: 10;
+        }
+
+        .floating-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+            left: -270px;
+        }
+
+        .floating-panel-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.2rem;
+            color: var(--centro-norte);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .floating-panel-content {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .floating-panel-content strong {
+            color: var(--centro-norte);
+            font-weight: 700;
+        }
+
+        .floating-panel-hint {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            font-style: italic;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            margin-top: 12px;
+        }
+
         /* Map region styles */
         .map-region {
             cursor: pointer;
@@ -1257,7 +1316,20 @@
         </p>
 
         <!-- MAP SVG -->
-        <div class="map-container">
+        <div class="map-container" id="mapContainer">
+            <!-- Floating Panel -->
+            <div class="floating-panel" id="floatingPanel">
+                <div class="floating-panel-title">
+                    <span>ℹ️</span>
+                    Mapa Interativo
+                </div>
+                <div class="floating-panel-content">
+                    Explore as <strong>4 mesorregiões</strong> do Piauí clicando em cada região para descobrir características únicas da <strong>Floresta Fóssil de Altos</strong>.
+                </div>
+                <div class="floating-panel-hint">
+                    💡 Passe o mouse sobre as regiões para ver mais detalhes.
+                </div>
+            </div>
             <div class="map-svg-wrapper">
                 <svg viewBox="0 0 500 650" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa interativo do Piaui com quatro mesorregioes">
                     <!-- Background decoration -->
@@ -1968,6 +2040,22 @@
 
             loadQuestion(region);
         };
+
+        // ============================================
+        // FLOATING PANEL - SHOW/HIDE ON MAP HOVER
+        // ============================================
+        const mapContainer = document.getElementById('mapContainer');
+        const floatingPanel = document.getElementById('floatingPanel');
+
+        if (mapContainer && floatingPanel) {
+            mapContainer.addEventListener('mouseenter', function() {
+                floatingPanel.classList.add('visible');
+            });
+
+            mapContainer.addEventListener('mouseleave', function() {
+                floatingPanel.classList.remove('visible');
+            });
+        }
 
         // ============================================
         // MAP INTERACTIONS

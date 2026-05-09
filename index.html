@@ -2091,6 +2091,44 @@
         });
 
         // ============================================
+        // SCROLL TO MAP
+        // ============================================
+        window.scrollToMap = function() {
+            document.getElementById('mapa').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // ============================================
+        // INTERSECTION OBSERVER - ANIMATE ON SCROLL
+        // ============================================
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Stagger children
+                    const blocks = entry.target.querySelectorAll('.content-block');
+                    blocks.forEach((block, i) => {
+                        block.style.opacity = '0';
+                        block.style.transform = 'translateY(20px)';
+                        block.style.transition = `opacity 0.5s ease ${i * 0.15}s, transform 0.5s ease ${i * 0.15}s`;
+                        setTimeout(() => {
+                            block.style.opacity = '1';
+                            block.style.transform = 'translateY(0)';
+                        }, 50);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ============================================
         // TEXTAREA CHARACTER COUNTER
         // ============================================
         const textareas = document.querySelectorAll('.textarea-wrapper textarea');

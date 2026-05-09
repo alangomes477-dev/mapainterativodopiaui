@@ -1019,6 +1019,346 @@
             transform: translateX(0);
         }
 
+        /* ============================================
+           MODAL FLUTUANTE - REGIÕES DO MAPA
+           ============================================ */
+        .floating-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+
+        .floating-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .floating-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+            border-radius: var(--radius-large);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1001;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .floating-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .floating-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background: rgba(44, 62, 80, 0.1);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 10;
+            color: var(--text-dark);
+        }
+
+        .floating-modal-close:hover {
+            background: rgba(44, 62, 80, 0.2);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .floating-modal-header {
+            width: 100%;
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-modal-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .floating-modal-tag {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .floating-modal-content {
+            padding: 28px;
+        }
+
+        .floating-modal-title {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .floating-modal-description {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .floating-modal-highlights {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .floating-modal-highlight {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: var(--radius-medium);
+            border-left: 4px solid;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .floating-modal-highlight-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .floating-modal-highlight-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .floating-modal-highlight-title {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .floating-modal-highlight-desc {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+
+        /* Cores por região */
+        .floating-modal.region-norte {
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .floating-modal.region-norte .floating-modal-title {
+            color: var(--norte-dark);
+        }
+
+        .floating-modal.region-norte .floating-modal-highlight {
+            border-left-color: var(--norte);
+        }
+
+        .floating-modal.region-centro-norte {
+            border-color: rgba(78, 205, 196, 0.3);
+        }
+
+        .floating-modal.region-centro-norte .floating-modal-title {
+            color: var(--centro-norte-dark);
+        }
+
+        .floating-modal.region-centro-norte .floating-modal-highlight {
+            border-left-color: var(--centro-norte);
+        }
+
+        .floating-modal.region-sudeste {
+            border-color: rgba(255, 217, 61, 0.3);
+        }
+
+        .floating-modal.region-sudeste .floating-modal-title {
+            color: var(--sudeste-dark);
+        }
+
+        .floating-modal.region-sudeste .floating-modal-highlight {
+            border-left-color: var(--sudeste);
+        }
+
+        .floating-modal.region-sudoeste {
+            border-color: rgba(107, 203, 119, 0.3);
+        }
+
+        .floating-modal.region-sudoeste .floating-modal-title {
+            color: var(--sudoeste-dark);
+        }
+
+        .floating-modal.region-sudoeste .floating-modal-highlight {
+            border-left-color: var(--sudoeste);
+        }
+
+        .floating-modal-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 12px 24px;
+            border-radius: 30px;
+            background: var(--text-dark);
+            color: var(--white);
+            text-decoration: none;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .floating-modal-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+            background: var(--norte-dark);
+        }
+
+        .region-norte .floating-modal-button {
+            background: var(--norte);
+        }
+
+        .region-norte .floating-modal-button:hover {
+            background: var(--norte-dark);
+        }
+
+        .region-centro-norte .floating-modal-button {
+            background: var(--centro-norte);
+        }
+
+        .region-centro-norte .floating-modal-button:hover {
+            background: var(--centro-norte-dark);
+        }
+
+        .region-sudeste .floating-modal-button {
+            background: var(--sudeste);
+            color: var(--text-dark);
+        }
+
+        .region-sudeste .floating-modal-button:hover {
+            background: var(--sudeste-dark);
+            color: var(--text-dark);
+        }
+
+        .region-sudoeste .floating-modal-button {
+            background: var(--sudoeste);
+        }
+
+        .region-sudoeste .floating-modal-button:hover {
+            background: var(--sudoeste-dark);
+        }
+
+        /* Responsividade Modal */
+        @media (max-width: 768px) {
+            .floating-modal {
+                width: 95%;
+                max-width: 100%;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .floating-modal-header {
+                height: 200px;
+            }
+
+            .floating-modal-content {
+                padding: 20px;
+            }
+
+            .floating-modal-title {
+                font-size: 1.4rem;
+            }
+
+            .floating-modal-description {
+                font-size: 0.95rem;
+            }
+
+            .floating-modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .floating-modal {
+                width: 98%;
+                max-height: 90vh;
+            }
+
+            .floating-modal-header {
+                height: 160px;
+            }
+
+            .floating-modal-content {
+                padding: 16px;
+            }
+
+            .floating-modal-title {
+                font-size: 1.2rem;
+            }
+
+            .floating-modal-description {
+                font-size: 0.9rem;
+                text-align: left;
+            }
+
+            .floating-modal-highlight {
+                padding: 10px 12px;
+            }
+
+            .floating-modal-tag {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+        }
+
         /* Responsivo - Menu Mobile */
         @media (max-width: 768px) {
             .side-menu {
@@ -1730,6 +2070,24 @@
     </section>
 
     <!-- ==========================================
+         MODAL FLUTUANTE - REGIÕES
+         ========================================== -->
+    <div class="floating-modal-overlay" id="modalOverlay"></div>
+    <div class="floating-modal" id="floatingModal">
+        <button class="floating-modal-close" id="modalClose">✕</button>
+        <div class="floating-modal-header" id="modalImage"></div>
+        <div class="floating-modal-content">
+            <div class="floating-modal-tag" id="modalTag"></div>
+            <h2 class="floating-modal-title" id="modalTitle"></h2>
+            <p class="floating-modal-description" id="modalDescription"></p>
+            <div class="floating-modal-highlights" id="modalHighlights"></div>
+            <button class="floating-modal-button" id="modalButton">
+                Explorar Atividade →
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
          FOOTER
          ========================================== -->
     <footer class="footer">
@@ -2058,37 +2416,153 @@
         }
 
         // ============================================
-        // MAP INTERACTIONS
+        // MODAL FLUTUANTE - DADOS DAS REGIÕES
         // ============================================
-        const regions = document.querySelectorAll('.map-region');
-        const tooltip = document.getElementById('mapTooltip');
+        const regionData = {
+            norte: {
+                title: '🌊 Norte Piauiense',
+                description: 'A região Norte do Piauí é caracterizada pela proximidade com o litoral, apresentando ecossistemas únicos como o Delta do Parnaíba. Essa área é berço de tradições culturais ricas e possui grande importância para a preservação ambiental brasileira.',
+                image: 'https://via.placeholder.com/500x280/FF6B6B/FFFFFF?text=Delta+do+Parnaiba',
+                tag: 'Litoral & Tradição',
+                highlights: [
+                    { icon: '🌴', title: 'Delta do Parnaíba', desc: 'Um dos únicos deltas em mar aberto das Américas' },
+                    { icon: '🐟', title: 'Biodiversidade', desc: 'Diversos ecossistemas marinhos e fluviais' },
+                    { icon: '🎨', title: 'Artesanato', desc: 'Trabalhos tradicionais com palha de carnaúba' },
+                    { icon: '📍', title: 'Menor Litoral', desc: 'Apenas 66 km de costa no Brasil' }
+                ]
+            },
+            'centro-norte': {
+                title: '🏛️ Centro-Norte Piauiense',
+                description: 'Região que abriga a capital Teresina, primeira capital brasileira planejada, localizada entre os rios Poti e Parnaíba. Centro político, cultural e educacional do estado, com grande importância histórica e desenvolvimento urbano significativo.',
+                image: 'https://via.placeholder.com/500x280/4ECDC4/FFFFFF?text=Teresina',
+                tag: 'Capital & Rios',
+                highlights: [
+                    { icon: '🏛️', title: 'Teresina', desc: 'Primeira capital planejada do Brasil' },
+                    { icon: '🌊', title: 'Dois Rios', desc: 'Encontro dos rios Poti e Parnaíba' },
+                    { icon: '🥜', title: 'Cajuína', desc: 'Patrimônio Cultural Imaterial do Brasil' },
+                    { icon: '📚', title: 'Educação', desc: 'Centro intelectual e cultural do Piauí' }
+                ]
+            },
+            sudeste: {
+                title: '🏔️ Sudeste Piauiense',
+                description: 'Região de grande importância arqueológica, abrigando a Serra da Capivara com seus mais de 1.300 sítios arqueológicos e pinturas rupestres de inestimável valor histórico. Terra de biodiversidade única e patrimônio da humanidade.',
+                image: 'https://via.placeholder.com/500x280/FFD93D/FFFFFF?text=Serra+da+Capivara',
+                tag: 'Patrimônio & História',
+                highlights: [
+                    { icon: '🏛️', title: 'Serra da Capivara', desc: 'Patrimônio da Humanidade (UNESCO)' },
+                    { icon: '🖼️', title: 'Sítios Arqueológicos', desc: 'Mais de 1.300 pinturas rupestres' },
+                    { icon: '🐾', title: 'Fauna Selvagem', desc: 'Espécies raras de cerrado e caatinga' },
+                    { icon: '⛰️', title: 'Oeiras', desc: 'Primeira capital do Piauí' }
+                ]
+            },
+            sudoeste: {
+                title: '🌾 Sudoeste Piauiense',
+                description: 'Região de cerrado e vegetação única, conhecida como berço das águas por abrigar nascentes de importantes rios brasileiros. Possui rica biodiversidade e é fundamental para o equilíbrio hidrológico nacional, com plantas e frutos típicos.',
+                image: 'https://via.placeholder.com/500x280/6BCB77/FFFFFF?text=Cerrado+Piauiense',
+                tag: 'Cerrado & Natureza',
+                highlights: [
+                    { icon: '💧', title: 'Berço das Águas', desc: 'Nascente de importantes rios brasileiros' },
+                    { icon: '🌿', title: 'Cerrado', desc: 'Bioma exclusivamente brasileiro' },
+                    { icon: '🍃', title: 'Pequi', desc: 'Fruta típica com sabor marcante' },
+                    { icon: '🏞️', title: 'Floriano', desc: 'Princesa do Sul piauiense' }
+                ]
+            }
+        };
 
+        // ============================================
+        // FUNÇÕES DO MODAL FLUTUANTE
+        // ============================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const floatingModal = document.getElementById('floatingModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalImage = document.getElementById('modalImage');
+        const modalTag = document.getElementById('modalTag');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalHighlights = document.getElementById('modalHighlights');
+        const modalButton = document.getElementById('modalButton');
+
+        function openModal(regionKey) {
+            const data = regionData[regionKey];
+            if (!data) return;
+
+            // Preencher dados do modal
+            modalImage.style.backgroundImage = `url('${data.image}')`;
+            modalTag.textContent = data.tag;
+            modalTitle.textContent = data.title;
+            modalDescription.textContent = data.description;
+
+            // Limpar e preencher highlights
+            modalHighlights.innerHTML = '';
+            data.highlights.forEach(highlight => {
+                const highlightEl = document.createElement('div');
+                highlightEl.className = 'floating-modal-highlight';
+                highlightEl.innerHTML = `
+                    <div class="floating-modal-highlight-icon">${highlight.icon}</div>
+                    <div class="floating-modal-highlight-text">
+                        <div class="floating-modal-highlight-title">${highlight.title}</div>
+                        <div class="floating-modal-highlight-desc">${highlight.desc}</div>
+                    </div>
+                `;
+                modalHighlights.appendChild(highlightEl);
+            });
+
+            // Adicionar classe de região para cores
+            floatingModal.className = `floating-modal region-${regionKey}`;
+
+            // Configurar botão para ir para a seção
+            modalButton.onclick = function() {
+                closeModal();
+                const target = document.getElementById(`secao-${regionKey}`);
+                if (target) {
+                    setTimeout(() => {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                }
+            };
+
+            // Abrir modal com animação
+            setTimeout(() => {
+                modalOverlay.classList.add('active');
+                floatingModal.classList.add('active');
+            }, 50);
+
+            // Prevenir scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            floatingModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Event listeners para close
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // Fechar ao pressionar ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // ATUALIZAR CLIQUE NAS REGIÕES
+        // ============================================
         regions.forEach(region => {
-            // Click - scroll to section
             region.addEventListener('click', function() {
                 const regionId = this.getAttribute('data-region');
-                const target = document.getElementById(`secao-${regionId}`);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-
-            // Hover - tooltip
-            region.addEventListener('mouseenter', function(e) {
-                const name = this.getAttribute('data-name');
-                tooltip.textContent = name;
-                tooltip.classList.add('visible');
-            });
-
-            region.addEventListener('mousemove', function(e) {
-                tooltip.style.left = e.clientX - tooltip.offsetWidth / 2 + 'px';
-                tooltip.style.top = e.clientY - 45 + 'px';
-            });
-
-            region.addEventListener('mouseleave', function() {
-                tooltip.classList.remove('visible');
+                openModal(regionId); // Abrir modal em vez de apenas scroll
             });
         });
+
+
 
         // ============================================
         // SCROLL TO MAP

@@ -435,6 +435,34 @@
             overflow: hidden;
         }
 
+        .section-card.locked {
+            pointer-events: none;
+            opacity: 0.58;
+            filter: grayscale(0.12);
+        }
+
+        .section-card.locked::after {
+            content: '🔒 Atividade liberada apenas após concluir a anterior';
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: rgba(44,62,80,0.92);
+            color: #ffffff;
+            font-size: 0.82rem;
+            padding: 8px 12px;
+            border-radius: 999px;
+            white-space: nowrap;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+        }
+
+        .section-card.locked .back-to-map,
+        .section-card.locked .video-links,
+        .section-card.locked button,
+        .section-card.locked textarea,
+        .section-card.locked .image-thumb {
+            opacity: 0.7;
+        }
+
         .section-card::before {
             content: '';
             position: absolute;
@@ -2156,6 +2184,39 @@
         };
 
         // Quiz state
+        const activityOrder = ['norte', 'centro-norte', 'sudeste', 'sudoeste'];
+        const activityUnlocked = {};
+
+        function initializeActivityLocks() {
+            activityOrder.forEach((region, index) => {
+                activityUnlocked[region] = index === 0 || localStorage.getItem(`activity-unlocked-${region}`) === 'true';
+            });
+            activityOrder.forEach(updateSectionLockState);
+        }
+
+        function updateSectionLockState(region) {
+            const section = document.getElementById(`secao-${region}`);
+            if (!section) return;
+            const card = section.querySelector('.section-card');
+            if (!card) return;
+            card.classList.toggle('locked', !activityUnlocked[region]);
+        }
+
+        function canAccessActivity(region) {
+            return activityUnlocked[region] === true;
+        }
+
+        function unlockNextActivity(region) {
+            const index = activityOrder.indexOf(region);
+            if (index < 0 || index >= activityOrder.length - 1) return;
+            const nextRegion = activityOrder[index + 1];
+            if (!activityUnlocked[nextRegion]) {
+                activityUnlocked[nextRegion] = true;
+                localStorage.setItem(`activity-unlocked-${nextRegion}`, 'true');
+                updateSectionLockState(nextRegion);
+            }
+        }
+
         const quizState = {};
         ['norte', 'centro-norte', 'sudeste', 'sudoeste'].forEach(region => {
             quizState[region] = {
@@ -2285,6 +2346,7 @@
                 </button>
             `;
             scoreEl.style.display = 'block';
+            unlockNextActivity(region);
         }
 
         window.restartQuiz = function(region) {
@@ -2327,6 +2389,10 @@
             // Click - scroll to section
             region.addEventListener('click', function() {
                 const regionId = this.getAttribute('data-region');
+                if (!canAccessActivity(regionId)) {
+                    alert('Complete a atividade anterior para liberar esta seção.');
+                    return;
+                }
                 const target = document.getElementById(`secao-${regionId}`);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2434,6 +2500,7 @@
         // ============================================
         // INIT
         // ============================================
+        initializeActivityLocks();
         ['norte', 'centro-norte', 'sudeste', 'sudoeste'].forEach(region => {
             loadQuestion(region);
         });

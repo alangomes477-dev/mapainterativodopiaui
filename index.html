@@ -1674,6 +1674,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
             Clique em uma regiao do mapa para explorar!
         </p>
+        <button type="button" id="saveNotesPdfButton" class="save-notes-btn">Salvar todas as anotações em PDF</button>
     </section>
 
     <!-- ==========================================
@@ -2029,6 +2030,8 @@
             <a id="videoPlayerLink" class="video-player-link" target="_blank" rel="noopener noreferrer">Abrir no YouTube</a>
         </div>
     </div>
+
+    <div class="print-notes-container" id="printNotesContainer" aria-hidden="true"></div>
 
     <!-- ==========================================
          JAVASCRIPT
@@ -2515,6 +2518,57 @@
         const videoPlayerLink = document.getElementById('videoPlayerLink');
         const videoPlayerIframe = document.getElementById('videoPlayerIframe');
         const isFileProtocol = window.location.protocol === 'file:';
+        const saveNotesButton = document.getElementById('saveNotesPdfButton');
+        const printNotesContainer = document.getElementById('printNotesContainer');
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function collectNoteEntries() {
+            const entries = [];
+            document.querySelectorAll('.textarea-wrapper').forEach(wrapper => {
+                const textarea = wrapper.querySelector('textarea');
+                const titleEl = wrapper.closest('.content-block')?.querySelector('.content-block-title');
+                const title = titleEl ? titleEl.textContent.trim() : 'Anotação';
+                entries.push({
+                    title,
+                    content: textarea.value.trim() || '(Sem conteúdo)'
+                });
+            });
+            return entries;
+        }
+
+        function renderNotesForPrint(entries) {
+            const date = new Date().toLocaleString('pt-BR');
+            let html = `
+                <div class="print-notes-header">
+                    <h1>Anotações do Aluno</h1>
+                    <p>Data: ${escapeHtml(date)}</p>
+                </div>`;
+            entries.forEach(entry => {
+                html += `
+                    <div class="print-note">
+                        <h2>${escapeHtml(entry.title)}</h2>
+                        <pre>${escapeHtml(entry.content)}</pre>
+                    </div>`;
+            });
+            return html;
+        }
+
+        function saveNotesAsPdf() {
+            const entries = collectNoteEntries();
+            if (!entries.length) return;
+            printNotesContainer.innerHTML = renderNotesForPrint(entries);
+            window.print();
+        }
+
+        if (saveNotesButton && printNotesContainer) {
+            saveNotesButton.addEventListener('click', saveNotesAsPdf);
+        }
 
         function openLightbox(src, alt) {
             lightboxImg.src = src;

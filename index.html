@@ -2551,8 +2551,8 @@
         loadSavedNotes();
 
         const lightbox = document.getElementById('imageLightbox');
-        const lightboxImg = lightbox.querySelector('img');
-        const lightboxClose = lightbox.querySelector('.image-lightbox-close');
+        const lightboxImg = lightbox ? lightbox.querySelector('img') : null;
+        const lightboxClose = lightbox ? lightbox.querySelector('.image-lightbox-close') : null;
         const videoModal = document.getElementById('videoModal');
         const videoModalClose = document.querySelector('.video-modal-close');
         const videoPlayerTitle = document.getElementById('videoPlayerTitle');
@@ -2667,6 +2667,7 @@
         });
 
         function openLightbox(src, alt) {
+            if (!lightbox || !lightboxImg) return;
             lightboxImg.src = src;
             lightboxImg.alt = alt;
             lightbox.classList.add('visible');
@@ -2674,6 +2675,7 @@
         }
 
         function closeLightbox() {
+            if (!lightbox || !lightboxImg) return;
             lightbox.classList.remove('visible');
             lightboxImg.src = '';
             lightbox.setAttribute('aria-hidden', 'true');
@@ -2682,23 +2684,29 @@
         document.querySelectorAll('.image-thumb').forEach(button => {
             button.addEventListener('click', () => {
                 const src = button.getAttribute('data-large');
-                const alt = button.querySelector('img').alt || 'Imagem ampliada';
+                const imgEl = button.querySelector('img');
+                const alt = imgEl ? imgEl.alt : 'Imagem ampliada';
                 openLightbox(src, alt);
             });
         });
 
-        lightboxClose.addEventListener('click', closeLightbox);
-        lightbox.addEventListener('click', (event) => {
-            if (event.target === lightbox) {
-                closeLightbox();
-            }
-        });
+        if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+        if (lightbox) {
+            lightbox.addEventListener('click', (event) => {
+                if (event.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+        }
+
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && lightbox.classList.contains('visible')) {
-                closeLightbox();
-            }
-            if (event.key === 'Escape' && videoModal.classList.contains('active')) {
-                closeVideoModal();
+            if (event.key === 'Escape') {
+                if (lightbox && lightbox.classList.contains('visible')) {
+                    closeLightbox();
+                }
+                if (videoModal && videoModal.classList.contains('active')) {
+                    closeVideoModal();
+                }
             }
         });
 
@@ -2707,11 +2715,14 @@
         }
 
         function openVideoModal(label, videoId) {
+            if (!videoModal || !videoPlayerIframe) return;
             const youtubeWatchUrl = `https://www.youtube.com/watch?v=${videoId}`;
-            videoPlayerTitle.textContent = label;
-            videoPlayerLink.href = youtubeWatchUrl;
-            videoPlayerLink.textContent = 'Abrir no YouTube';
-            videoPlayerNote.textContent = isFileProtocol
+            if (videoPlayerTitle) videoPlayerTitle.textContent = label;
+            if (videoPlayerLink) {
+                videoPlayerLink.href = youtubeWatchUrl;
+                videoPlayerLink.textContent = 'Abrir no YouTube';
+            }
+            if (videoPlayerNote) videoPlayerNote.textContent = isFileProtocol
                 ? 'Você está abrindo o arquivo localmente com file://. Para assistir o vídeo embutido, abra o projeto em um servidor local ou use o link abaixo.'
                 : 'Se o vídeo não carregar, use o link abaixo para assistir no YouTube.';
             videoPlayerIframe.src = isFileProtocol ? '' : getYoutubeEmbedUrl(videoId);
@@ -2721,6 +2732,7 @@
         }
 
         function closeVideoModal() {
+            if (!videoModal || !videoPlayerIframe) return;
             videoModal.classList.remove('active');
             videoPlayerIframe.src = '';
             videoPlayerIframe.style.display = 'block';
@@ -2735,12 +2747,14 @@
             });
         });
 
-        videoModalClose.addEventListener('click', closeVideoModal);
-        videoModal.addEventListener('click', (event) => {
-            if (event.target === videoModal) {
-                closeVideoModal();
-            }
-        });
+        if (videoModalClose) videoModalClose.addEventListener('click', closeVideoModal);
+        if (videoModal) {
+            videoModal.addEventListener('click', (event) => {
+                if (event.target === videoModal) {
+                    closeVideoModal();
+                }
+            });
+        }
 
     })();
     </script>

@@ -1277,6 +1277,10 @@
             background: linear-gradient(135deg, var(--sudoeste), var(--sudoeste-light));
         }
 
+        .side-menu-link:nth-child(5)::before {
+            background: linear-gradient(135deg, #6c757d, #8e99a4);
+        }
+
         .side-menu-link span {
             position: relative;
             z-index: 2;
@@ -1298,6 +1302,10 @@
 
         .side-menu-link:nth-child(4) span {
             animation-delay: -1.5s;
+        }
+
+        .side-menu-link:nth-child(5) span {
+            animation-delay: -2s;
         }
 
         .side-menu-tooltip {
@@ -1561,23 +1569,27 @@
     <!-- Tooltip -->
     <div class="map-tooltip" id="mapTooltip"></div>
 
-    <!-- Side Menu - Links Externos -->
-    <nav class="side-menu" aria-label="Links externos">
-        <a href="https://pt.wikipedia.org/wiki/Piau%C3%AD" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Wikipedia - Piauí">
-            <span>🔍</span>
-            <div class="side-menu-tooltip">Wikipedia</div>
+    <!-- Side Menu - Links das Atividades -->
+    <nav class="side-menu" aria-label="Atividades">
+        <a href="#secao-norte" class="side-menu-link" title="Atividade 1 - Norte Piauiense">
+            <span>🔴</span>
+            <div class="side-menu-tooltip">Atividade 1</div>
         </a>
-        <a href="https://www.piauigov.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Governo do Piauí">
-            <span>💡</span>
-            <div class="side-menu-tooltip">Gov. Piauí</div>
+        <a href="#secao-centro-norte" class="side-menu-link" title="Atividade 2 - Centro-Norte Piauiense">
+            <span>🔵</span>
+            <div class="side-menu-tooltip">Atividade 2</div>
         </a>
-        <a href="https://www.florestafossildaltos.com.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Floresta Fóssil de Altos">
-            <span>💻</span>
-            <div class="side-menu-tooltip">Floresta Fóssil</div>
+        <a href="#secao-sudeste" class="side-menu-link" title="Atividade 3 - Sudeste Piauiense">
+            <span>🟡</span>
+            <div class="side-menu-tooltip">Atividade 3</div>
         </a>
-        <a href="https://www.viajepelopi.com.br/" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Turismo do Piauí">
-            <span>👥</span>
-            <div class="side-menu-tooltip">Turismo</div>
+        <a href="#secao-sudoeste" class="side-menu-link" title="Atividade 4 - Sudoeste Piauiense">
+            <span>🟢</span>
+            <div class="side-menu-tooltip">Atividade 4</div>
+        </a>
+        <a href="https://forms.gle/La6h57FfsGC5fn5o7" target="_blank" rel="noopener noreferrer" class="side-menu-link" title="Formulário de Feedback">
+            <span>📋</span>
+            <div class="side-menu-tooltip">Feedback</div>
         </a>
     </nav>
 

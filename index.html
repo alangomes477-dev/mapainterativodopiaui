@@ -436,7 +436,6 @@
         }
 
         .section-card.locked {
-            pointer-events: none;
             opacity: 0.58;
             filter: grayscale(0.12);
         }
@@ -456,11 +455,16 @@
         }
 
         .section-card.locked .back-to-map,
-        .section-card.locked .video-links,
-        .section-card.locked button,
+        .section-card.locked button:not(.video-link),
         .section-card.locked textarea,
         .section-card.locked .image-thumb {
             opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .section-card.locked .video-link {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .section-card::before {
@@ -636,17 +640,34 @@
         }
 
         .video-modal-content {
-            width: min(900px, 100%);
+            width: min(1100px, 100%);
             background: var(--white);
             border-radius: 24px;
-            padding: 24px;
+            padding: 16px;
             box-shadow: var(--shadow-medium);
             position: relative;
-            max-height: min(90vh, 760px);
+            max-height: calc(100vh - 32px);
+            height: calc(100vh - 32px);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
+        }
+
+        .video-modal-frame {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background: #000;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .video-modal-frame iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            border: 0;
         }
 
         .video-modal-header {
@@ -701,7 +722,8 @@
 
         .video-modal-frame {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            min-height: 65vh;
+            max-height: calc(100vh - 220px);
             background: #000;
             border-radius: 18px;
             overflow: hidden;
@@ -1825,8 +1847,7 @@
                         <span class="emoji">📍</span>Lista 2
                     </h3>
                     <ul>
-                        <li><a href="https://dinosaurpictures.org/ancient-earth#240">Link 1</a></li>
-            
+                        <li><button type="button" class="video-link" data-site="https://dinosaurpictures.org/ancient-earth#240">Visualizar site externo completo</button></li>
                     </ul>
                 </div>
 
@@ -2061,7 +2082,7 @@
                 Se o vídeo não carregar, abra o projeto em um servidor local ou clique no link abaixo.
             </div>
             <div class="video-modal-frame">
-                <iframe id="videoPlayerIframe" src="" title="Vídeo da atividade" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe id="videoPlayerIframe" src="" title="Vídeo da atividade" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; geolocation; microphone; camera" allowfullscreen></iframe>
             </div>
             <a id="videoPlayerLink" class="video-player-link" target="_blank" rel="noopener noreferrer">Abrir no YouTube</a>
         </div>
@@ -2710,19 +2731,24 @@
             return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
         }
 
-        function openVideoModal(label, videoId) {
+        function openVideoModal(label, videoId, previewUrl, siteUrl) {
             if (!videoModal || !videoPlayerIframe) return;
-            const youtubeWatchUrl = `https://www.youtube.com/watch?v=${videoId}`;
             if (videoPlayerTitle) videoPlayerTitle.textContent = label;
             if (videoPlayerLink) {
-                videoPlayerLink.href = youtubeWatchUrl;
-                videoPlayerLink.textContent = 'Abrir no YouTube';
+                const href = siteUrl || previewUrl || `https://www.youtube.com/watch?v=${videoId}`;
+                videoPlayerLink.href = href;
+                videoPlayerLink.textContent = siteUrl ? 'Abrir site original' : previewUrl ? 'Abrir link original' : 'Abrir no YouTube';
             }
-            if (videoPlayerNote) videoPlayerNote.textContent = isFileProtocol
-                ? 'Você está abrindo o arquivo localmente com file://. Para assistir o vídeo embutido, abra o projeto em um servidor local ou use o link abaixo.'
-                : 'Se o vídeo não carregar, use o link abaixo para assistir no YouTube.';
-            videoPlayerIframe.src = isFileProtocol ? '' : getYoutubeEmbedUrl(videoId);
-            videoPlayerIframe.style.display = isFileProtocol ? 'none' : 'block';
+            if (videoPlayerNote) videoPlayerNote.textContent = siteUrl
+                ? 'Você está visualizando o site externo dentro do mesmo player. Use os controles do site para mudar a era.'
+                : previewUrl
+                    ? 'Você está visualizando um site dentro da mesma página. Se não carregar, use o link abaixo.'
+                    : isFileProtocol
+                        ? 'Você está abrindo o arquivo localmente com file://. Para assistir o vídeo embutido, abra o projeto em um servidor local ou use o link abaixo.'
+                        : 'Se o vídeo não carregar, use o link abaixo para assistir no YouTube.';
+            videoModal.classList.remove('fullscreen');
+            videoPlayerIframe.src = siteUrl || previewUrl || (isFileProtocol ? '' : getYoutubeEmbedUrl(videoId));
+            videoPlayerIframe.style.display = 'block';
             videoModal.classList.add('active');
             videoModal.setAttribute('aria-hidden', 'false');
         }
@@ -2737,9 +2763,17 @@
 
         document.querySelectorAll('.video-link').forEach(button => {
             button.addEventListener('click', () => {
+                const siteUrl = button.getAttribute('data-site');
+                const previewUrl = button.getAttribute('data-url');
                 const videoId = button.getAttribute('data-video');
                 const label = button.textContent.trim();
-                openVideoModal(label, videoId);
+                if (siteUrl) {
+                    openVideoModal(label, null, null, siteUrl);
+                } else if (previewUrl) {
+                    openVideoModal(label, null, previewUrl);
+                } else {
+                    openVideoModal(label, videoId);
+                }
             });
         });
 

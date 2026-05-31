@@ -296,10 +296,10 @@
             border: 2px solid rgba(78, 205, 196, 0.3);
             z-index: 10;
         }
-
-        .floating-panel.visible {
-            opacity: 1;
-            pointer-events: auto;
+            <p class="hero-hint">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+                Clique em uma regiao do mapa para explorar!
+            </p>
             left: -270px;
         }
 
@@ -1015,6 +1015,39 @@
             transform: translateX(-4px);
         }
 
+        .save-note-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--centro-norte), var(--sudeste));
+            color: var(--white);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 16px;
+        }
+
+        .save-note-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.16);
+        }
+
+        .save-note-status {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            color: var(--centro-norte-dark);
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
         /* ============================================
            FOOTER
            ============================================ */
@@ -1674,7 +1707,6 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
             Clique em uma regiao do mapa para explorar!
         </p>
-        <button type="button" id="saveNotesPdfButton" class="save-notes-btn">Salvar todas as anotações em PDF</button>
     </section>
 
     <!-- ==========================================
@@ -1738,19 +1770,21 @@
                     <p>Toque em uma imagem para ver maior.</p>
                 </div>
 
-                <div class="content-block">
-                    <h3 class="content-block-title">
-                        <span class="emoji">🐠</span> Anotações
-                    </h3>
-                    <form>
-                        <label class="textarea-label">Suas anotações pessoais:</label>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
-                            <span class="textarea-icon">✏️</span>
-                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
-                        </div>
-                    </form>
-                </div>
+                    <div class="content-block">
+                        <h3 class="content-block-title">
+                            <span class="emoji">🐠</span> Anotações
+                        </h3>
+                        <form class="note-form" data-region="norte">
+                            <label class="textarea-label">Suas anotações pessoais:</label>
+                            <div class="textarea-wrapper">
+                                <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                                <span class="textarea-icon">✏️</span>
+                                <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                            </div>
+                            <button type="button" class="save-note-btn" data-region="norte">Salvar esta anotação</button>
+                            <div class="save-note-status" aria-live="polite"></div>
+                        </form>
+                    </div>
             </div>
 
             <!-- Quiz Norte -->
@@ -1814,19 +1848,21 @@
                     <p>imagem </p>
                 </div>
 
-                <div class="content-block">
-                    <h3 class="content-block-title">
-                        <span class="emoji">🍽️</span> Anotações 
-                    </h3>
-                    <form>
-                        <label class="textarea-label">Suas anotações pessoais:</label>
-                        <div class="textarea-wrapper">
-                            <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
-                            <span class="textarea-icon">✏️</span>
-                            <span class="textarea-counter"><span class="char-count">0</span>/500</span>
-                        </div>
-                    </form>
-                </div>
+                    <div class="content-block">
+                        <h3 class="content-block-title">
+                            <span class="emoji">🍽️</span> Anotações 
+                        </h3>
+                        <form class="note-form" data-region="centro-norte">
+                            <label class="textarea-label">Suas anotações pessoais:</label>
+                            <div class="textarea-wrapper">
+                                <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
+                                <span class="textarea-icon">✏️</span>
+                                <span class="textarea-counter"><span class="char-count">0</span>/500</span>
+                            </div>
+                            <button type="button" class="save-note-btn" data-region="centro-norte">Salvar esta anotação</button>
+                            <div class="save-note-status" aria-live="polite"></div>
+                        </form>
+                    </div>
             </div>
 
             <!-- Quiz Centro-Norte -->
@@ -1893,13 +1929,15 @@
                     <h3 class="content-block-title">
                         <span class="emoji">🦎</span> Anotações
                     </h3>
-                    <form>
+                    <form class="note-form" data-region="sudeste">
                         <label class="textarea-label">Suas anotações pessoais:</label>
                         <div class="textarea-wrapper">
                             <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
                             <span class="textarea-icon">✏️</span>
                             <span class="textarea-counter"><span class="char-count">0</span>/500</span>
                         </div>
+                        <button type="button" class="save-note-btn" data-region="sudeste">Salvar esta anotação</button>
+                        <div class="save-note-status" aria-live="polite"></div>
                     </form>
                 </div>
             </div>
@@ -1969,13 +2007,15 @@
                     <h3 class="content-block-title">
                         <span class="emoji">🌿</span> Anotações
                     </h3>
-                    <form>
+                    <form class="note-form" data-region="sudoeste">
                         <label class="textarea-label">Suas anotações pessoais:</label>
                         <div class="textarea-wrapper">
                             <textarea placeholder="Escreva suas anotações aqui..." cols="40" rows="10"></textarea>
                             <span class="textarea-icon">✏️</span>
                             <span class="textarea-counter"><span class="char-count">0</span>/500</span>
                         </div>
+                        <button type="button" class="save-note-btn" data-region="sudoeste">Salvar esta anotação</button>
+                        <div class="save-note-status" aria-live="polite"></div>
                     </form>
                 </div>
             </div>
@@ -2030,8 +2070,6 @@
             <a id="videoPlayerLink" class="video-player-link" target="_blank" rel="noopener noreferrer">Abrir no YouTube</a>
         </div>
     </div>
-
-    <div class="print-notes-container" id="printNotesContainer" aria-hidden="true"></div>
 
     <!-- ==========================================
          JAVASCRIPT
@@ -2461,37 +2499,40 @@
         // TEXTAREA CHARACTER COUNTER
         // ============================================
         const textareas = document.querySelectorAll('.textarea-wrapper textarea');
-        textareas.forEach(textarea => {
+        const MAX_NOTE_CHARS = 500;
+
+        function updateCounterFor(textarea) {
             const wrapper = textarea.parentElement;
             const counter = wrapper.querySelector('.char-count');
-            const maxChars = 500;
+            if (!counter) return;
+            let currentLength = textarea.value.length;
 
+            if (currentLength > MAX_NOTE_CHARS) {
+                textarea.value = textarea.value.substring(0, MAX_NOTE_CHARS);
+                currentLength = MAX_NOTE_CHARS;
+            }
+
+            counter.textContent = currentLength;
+
+            if (currentLength > MAX_NOTE_CHARS * 0.8) {
+                counter.style.color = 'rgba(255, 107, 107, 0.8)';
+                counter.style.fontWeight = '700';
+            } else if (currentLength > MAX_NOTE_CHARS * 0.5) {
+                counter.style.color = 'rgba(255, 217, 61, 0.8)';
+                counter.style.fontWeight = '600';
+            } else {
+                counter.style.color = 'rgba(93, 109, 126, 0.7)';
+                counter.style.fontWeight = '600';
+            }
+        }
+
+        textareas.forEach(textarea => {
             // Initial count
-            counter.textContent = textarea.value.length;
+            updateCounterFor(textarea);
 
             // Update on input
             textarea.addEventListener('input', function() {
-                const currentLength = this.value.length;
-                counter.textContent = currentLength;
-
-                // Change color if reaching limit
-                if (currentLength > maxChars * 0.8) {
-                    counter.style.color = 'rgba(255, 107, 107, 0.8)';
-                    counter.style.fontWeight = '700';
-                } else if (currentLength > maxChars * 0.5) {
-                    counter.style.color = 'rgba(255, 217, 61, 0.8)';
-                    counter.style.fontWeight = '600';
-                } else {
-                    counter.style.color = 'rgba(93, 109, 126, 0.7)';
-                    counter.style.fontWeight = '600';
-                }
-
-                // Prevent exceeding max
-                if (currentLength > maxChars) {
-                    this.value = this.value.substring(0, maxChars);
-                    counter.textContent = maxChars;
-                    counter.style.color = 'rgba(239, 83, 80, 0.9)';
-                }
+                updateCounterFor(this);
             });
 
             // Add animation on focus
@@ -2507,6 +2548,7 @@
         ['norte', 'centro-norte', 'sudeste', 'sudoeste'].forEach(region => {
             loadQuestion(region);
         });
+        loadSavedNotes();
 
         const lightbox = document.getElementById('imageLightbox');
         const lightboxImg = lightbox.querySelector('img');
@@ -2518,57 +2560,111 @@
         const videoPlayerLink = document.getElementById('videoPlayerLink');
         const videoPlayerIframe = document.getElementById('videoPlayerIframe');
         const isFileProtocol = window.location.protocol === 'file:';
-        const saveNotesButton = document.getElementById('saveNotesPdfButton');
-        const printNotesContainer = document.getElementById('printNotesContainer');
 
+        function loadSavedNotes() {
+            document.querySelectorAll('.note-form').forEach(form => {
+                const region = form.dataset.region;
+                const textarea = form.querySelector('textarea');
+                const savedValue = localStorage.getItem(`note-${region}`);
+                if (savedValue !== null && textarea) {
+                    textarea.value = savedValue;
+                    updateCounterFor(textarea);
+                }
+            });
+        }
+
+        // Escape HTML for safe fallback rendering
         function escapeHtml(text) {
-            return text
+            return String(text)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        function collectNoteEntries() {
-            const entries = [];
-            document.querySelectorAll('.textarea-wrapper').forEach(wrapper => {
-                const textarea = wrapper.querySelector('textarea');
-                const titleEl = wrapper.closest('.content-block')?.querySelector('.content-block-title');
-                const title = titleEl ? titleEl.textContent.trim() : 'Anotação';
-                entries.push({
-                    title,
-                    content: textarea.value.trim() || '(Sem conteúdo)'
-                });
+        // Load jsPDF dynamically if needed and call callback when ready
+        function ensureJsPdf(callback) {
+            if (window.jspdf && window.jspdf.jsPDF) return callback();
+            const existing = document.querySelector('script[data-jspdf]');
+            if (existing) {
+                existing.addEventListener('load', () => callback());
+                existing.addEventListener('error', () => callback(null));
+                return;
+            }
+            const s = document.createElement('script');
+            s.dataset.jspdf = '1';
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            s.onload = () => callback();
+            s.onerror = () => callback(null);
+            document.head.appendChild(s);
+        }
+
+        function saveNote(region, textarea, statusEl) {
+            const text = textarea.value.trim();
+            // persist locally
+            localStorage.setItem(`note-${region}`, text);
+
+            // visual feedback
+            statusEl.textContent = 'Anotação salva com sucesso!';
+            statusEl.style.opacity = '1';
+            setTimeout(() => {
+                statusEl.style.opacity = '0';
+            }, 2200);
+
+            // prepare PDF content (include simple header)
+            const now = new Date();
+            const dateStr = now.toLocaleString('pt-BR').replace(/[:\/]|, /g, '-');
+            const filename = `anotacao-${region}-${dateStr}.pdf`;
+
+            ensureJsPdf((ok) => {
+                // if jsPDF available, use it to generate and trigger download
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+                        const margin = 40;
+                        const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                        doc.setFontSize(14);
+                        doc.text(`Anotação - ${region}`, margin, 60);
+                        doc.setFontSize(10);
+                        doc.text(`Data: ${now.toLocaleString('pt-BR')}`, margin, 80);
+                        doc.setFontSize(12);
+                        // split text into lines that fit page width
+                        const lines = doc.splitTextToSize(text || '(Sem conteúdo)', pageWidth);
+                        doc.text(lines, margin, 110);
+                        doc.save(filename);
+                    } catch (e) {
+                        // fallback to print window
+                        const w = window.open('', '_blank');
+                        w.document.write(`<pre>${escapeHtml(text)}</pre>`);
+                        w.document.close();
+                        w.print();
+                    }
+                } else {
+                    // jsPDF didn't load — fallback: open printable window so user can Save as PDF
+                    const w = window.open('', '_blank');
+                    w.document.write(`<html><head><title>Anotação</title><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;padding:20px}pre{white-space:pre-wrap;word-wrap:break-word}</style></head><body><h2>Anotação - ${escapeHtml(region)}</h2><p><em>Data: ${escapeHtml(now.toLocaleString('pt-BR'))}</em></p><pre>${escapeHtml(text || '(Sem conteúdo)')}</pre></body></html>`);
+                    w.document.close();
+                    w.focus();
+                    // best-effort trigger print dialog
+                    setTimeout(() => w.print(), 300);
+                }
             });
-            return entries;
         }
 
-        function renderNotesForPrint(entries) {
-            const date = new Date().toLocaleString('pt-BR');
-            let html = `
-                <div class="print-notes-header">
-                    <h1>Anotações do Aluno</h1>
-                    <p>Data: ${escapeHtml(date)}</p>
-                </div>`;
-            entries.forEach(entry => {
-                html += `
-                    <div class="print-note">
-                        <h2>${escapeHtml(entry.title)}</h2>
-                        <pre>${escapeHtml(entry.content)}</pre>
-                    </div>`;
+        document.querySelectorAll('.save-note-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const region = button.dataset.region;
+                const form = button.closest('.note-form');
+                if (!form) return;
+                const textarea = form.querySelector('textarea');
+                const statusEl = form.querySelector('.save-note-status');
+                if (textarea && statusEl) {
+                    saveNote(region, textarea, statusEl);
+                }
             });
-            return html;
-        }
-
-        function saveNotesAsPdf() {
-            const entries = collectNoteEntries();
-            if (!entries.length) return;
-            printNotesContainer.innerHTML = renderNotesForPrint(entries);
-            window.print();
-        }
-
-        if (saveNotesButton && printNotesContainer) {
-            saveNotesButton.addEventListener('click', saveNotesAsPdf);
-        }
+        });
 
         function openLightbox(src, alt) {
             lightboxImg.src = src;

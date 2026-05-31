@@ -735,6 +735,66 @@
             border: 0;
         }
 
+        /* Locked modal styles */
+        .locked-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.48);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 20px;
+        }
+
+        .locked-modal.active {
+            display: flex;
+        }
+
+        .locked-modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow-medium);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .locked-modal-close {
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(0,0,0,0.06);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .locked-modal-body {
+            display:flex;
+            gap:14px;
+            align-items:center;
+            justify-content:center;
+            padding: 8px 6px;
+        }
+
+        .locked-modal-icon {
+            font-size: 36px;
+        }
+
+        .locked-modal-text {
+            font-family: 'Nunito',sans-serif;
+            font-weight:700;
+            color:var(--text-dark);
+            font-size:1rem;
+            text-align:left;
+        }
+
         .content-block ul {
             list-style: none;
             padding: 0;
@@ -1844,8 +1904,8 @@
     <section class="section section-centro-norte" id="secao-centro-norte">
         <div class="section-card animate-on-scroll">
             <div class="section-header">
-                <div class="section-icon">🏛️</div>
-                <h2 class="section-title">Atividade 2</h2>
+                <div class="section-icon">💡</div>
+                <h2 class="section-title">Formulação de hipóteses</h2>
             </div>
 
             <div class="curiosidade-box">
@@ -1917,8 +1977,8 @@
     <section class="section section-sudeste" id="secao-sudeste">
         <div class="section-card animate-on-scroll">
             <div class="section-header">
-                <div class="section-icon">🏔️</div>
-                <h2 class="section-title">Atividade 3</h2>
+                <div class="section-icon">💻</div>
+                <h2 class="section-title">Experimentação</h2>
             </div>
 
             <div class="curiosidade-box">
@@ -1994,8 +2054,8 @@
     <section class="section section-sudoeste" id="secao-sudoeste">
         <div class="section-card animate-on-scroll">
             <div class="section-header">
-                <div class="section-icon">🌾</div>
-                <h2 class="section-title">Atividade 4</h2>
+                <div class="section-icon">👥</div>
+                <h2 class="section-title">Produção/Socialização</h2>
             </div>
 
             <div class="curiosidade-box">
@@ -2097,6 +2157,17 @@
                 <iframe id="videoPlayerIframe" src="" title="Vídeo da atividade" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; geolocation; microphone; camera" allowfullscreen></iframe>
             </div>
             <a id="videoPlayerLink" class="video-player-link" target="_blank" rel="noopener noreferrer">Abrir no YouTube</a>
+        </div>
+    </div>
+
+    <!-- Locked modal: shown when activity is not unlocked -->
+    <div class="locked-modal" id="lockedModal" aria-hidden="true">
+        <div class="locked-modal-content">
+            <button class="locked-modal-close" aria-label="Fechar">×</button>
+            <div class="locked-modal-body">
+                <div class="locked-modal-icon">🔒</div>
+                <div class="locked-modal-text" id="lockedModalMessage">Atividade bloqueada. Complete a atividade anterior para liberar esta seção.</div>
+            </div>
         </div>
     </div>
 
@@ -2460,7 +2531,7 @@
             region.addEventListener('click', function() {
                 const regionId = this.getAttribute('data-region');
                 if (!canAccessActivity(regionId)) {
-                    alert('Complete a atividade anterior para liberar esta seção.');
+                    showLockedModal('Complete a atividade anterior para liberar esta seção.');
                     return;
                 }
                 const target = document.getElementById(`secao-${regionId}`);
@@ -2483,6 +2554,24 @@
 
             region.addEventListener('mouseleave', function() {
                 tooltip.classList.remove('visible');
+            });
+        });
+
+        // ============================================
+        // SIDE MENU - PREVENT NAV FOR LOCKED ACTIVITIES
+        // ============================================
+        document.querySelectorAll('.side-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href') || '';
+                // only intercept internal activity anchors like #secao-norte
+                if (href.startsWith('#secao-')) {
+                    const region = href.replace('#secao-', '');
+                    if (!canAccessActivity(region)) {
+                        e.preventDefault();
+                        showLockedModal('Complete a atividade anterior para liberar esta seção.');
+                        return;
+                    }
+                }
             });
         });
 
@@ -2728,6 +2817,30 @@
             });
         }
 
+        const lockedModal = document.getElementById('lockedModal');
+        const lockedModalClose = document.querySelector('.locked-modal-close');
+
+        function showLockedModal(message) {
+            if (!lockedModal) return;
+            const msgEl = document.getElementById('lockedModalMessage');
+            if (msgEl) msgEl.textContent = message || 'Atividade bloqueada. Complete a atividade anterior para liberar esta seção.';
+            lockedModal.classList.add('active');
+            lockedModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeLockedModal() {
+            if (!lockedModal) return;
+            lockedModal.classList.remove('active');
+            lockedModal.setAttribute('aria-hidden', 'true');
+        }
+
+        if (lockedModalClose) lockedModalClose.addEventListener('click', closeLockedModal);
+        if (lockedModal) {
+            lockedModal.addEventListener('click', (event) => {
+                if (event.target === lockedModal) closeLockedModal();
+            });
+        }
+
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 if (lightbox && lightbox.classList.contains('visible')) {
@@ -2735,6 +2848,9 @@
                 }
                 if (videoModal && videoModal.classList.contains('active')) {
                     closeVideoModal();
+                }
+                if (lockedModal && lockedModal.classList.contains('active')) {
+                    closeLockedModal();
                 }
             }
         });
